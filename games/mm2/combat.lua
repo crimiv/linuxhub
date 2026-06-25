@@ -326,6 +326,7 @@ CombatTab:Button({
 
 local autoGunTPEnabled = false
 local gunTPTimer = nil
+local gunTPLastCheck = 0
 local currentSheriff = nil
 local mapChildAddedConnection = nil
 local sheriffCharacterRemovedConnection = nil
@@ -365,13 +366,12 @@ local function SetupAutoGunTP()
     CleanupAutoGunTP()
     if not autoGunTPEnabled then return end
     TryTeleportToGun()
+    gunTPLastCheck = 0
     gunTPTimer = game:GetService("RunService").Stepped:Connect(function()
         if not autoGunTPEnabled then return end
-        if not gunTPTimer._lastCheck then
-            gunTPTimer._lastCheck = tick()
-        end
-        if tick() - gunTPTimer._lastCheck < 0.5 then return end
-        gunTPTimer._lastCheck = tick()
+        local now = tick()
+        if now - gunTPLastCheck < 0.5 then return end
+        gunTPLastCheck = now
         TryTeleportToGun()
     end)
     local map = currentMap and workspace:FindFirstChild(currentMap)
