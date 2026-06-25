@@ -4,37 +4,6 @@ local MiscTab = AppleHub.Window:Tab({ Title = "Misc" })
 
 local antiFlingEnabled = AppleHub.Toggles.antiFlingEnabled or false
 local antiFlingHeartbeat = nil
-local movementKeys = {Enum.KeyCode.W, Enum.KeyCode.A, Enum.KeyCode.S, Enum.KeyCode.D, Enum.KeyCode.Up, Enum.KeyCode.Down, Enum.KeyCode.Left, Enum.KeyCode.Right}
-local movementKeysPressed = {}
-
-local UIS = game:GetService("UserInputService")
-UIS.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    for _, key in ipairs(movementKeys) do
-        if input.KeyCode == key then
-            movementKeysPressed[key] = true
-            break
-        end
-    end
-end)
-UIS.InputEnded:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    for _, key in ipairs(movementKeys) do
-        if input.KeyCode == key then
-            movementKeysPressed[key] = nil
-            break
-        end
-    end
-end)
-
-local function IsMoving()
-    for _, key in ipairs(movementKeys) do
-        if movementKeysPressed[key] then
-            return true
-        end
-    end
-    return false
-end
 
 local function AntiFlingLoop()
     if not antiFlingEnabled then return end
@@ -42,8 +11,6 @@ local function AntiFlingLoop()
     if not localPlayer then return end
     local localChar = localPlayer.Character
     if not localChar then return end
-    local localRoot = localChar:FindFirstChild("HumanoidRootPart")
-    if not localRoot then return end
 
     for _, player in ipairs(game.Players:GetPlayers()) do
         if player == localPlayer then continue end
@@ -60,16 +27,16 @@ local function AntiFlingLoop()
         end
     end
 
-    if not IsMoving() then
-        if localRoot.Velocity.Magnitude > 0.1 then
+    local localRoot = localChar:FindFirstChild("HumanoidRootPart")
+    if localRoot then
+        if localRoot.Velocity.Magnitude > 150 then
             localRoot.Velocity = Vector3.new(0, 0, 0)
             localRoot.RotVelocity = Vector3.new(0, 0, 0)
         end
-    end
-
-    for _, child in ipairs(localChar:GetDescendants()) do
-        if child:IsA("BodyVelocity") or child:IsA("BodyAngularVelocity") or child:IsA("BodyForce") or child:IsA("BodyGyro") or child:IsA("BodyPosition") or child:IsA("BodyThrust") then
-            child:Destroy()
+        for _, child in ipairs(localChar:GetDescendants()) do
+            if child:IsA("BodyVelocity") or child:IsA("BodyAngularVelocity") or child:IsA("BodyForce") or child:IsA("BodyGyro") or child:IsA("BodyPosition") or child:IsA("BodyThrust") then
+                child:Destroy()
+            end
         end
     end
 end
