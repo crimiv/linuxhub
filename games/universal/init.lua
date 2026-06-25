@@ -24,25 +24,23 @@ local function CheckExecutor()
     return true
 end
 
-if not CheckExecutor() then
-    return
-end
+if not CheckExecutor() then return end
 
 local WindUI = LoadScript("shared/windui.lua")
 local utils = LoadScript("shared/utils.lua")
 local config = LoadScript("shared/config.lua")
 
-SilverHub = SilverHub or {}
-SilverHub.WindUI = WindUI
-SilverHub.Utils = utils
-SilverHub.Config = config
+AppleHub = AppleHub or {}
+AppleHub.WindUI = WindUI
+AppleHub.Utils = utils
+AppleHub.Config = config
 
 local version = config.version or "1.0.0"
 
 local Window = WindUI:CreateWindow({
     Title = "Apple Hub v" .. version .. " (Universal)",
     Author = "by coolio",
-    Folder = "SilverHub",
+    Folder = "AppleHub",
     Icon = "https://raw.githubusercontent.com/crimiv/applehub/refs/heads/main/icon/applehub.png",
     Size = UDim2.fromOffset(580, 460),
     MinSize = Vector2.new(560, 350),
@@ -60,7 +58,7 @@ local Window = WindUI:CreateWindow({
     },
 })
 
-SilverHub.Window = Window
+AppleHub.Window = Window
 
 task.spawn(function()
     local success, remoteConfig = pcall(function()
