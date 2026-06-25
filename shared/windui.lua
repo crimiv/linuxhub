@@ -5,6 +5,14 @@ local WindUI = (function()
     return loadstring(patched)()
 end)()
 
+local originalNotify = WindUI.Notify
+WindUI.Notify = function(params)
+    if type(params) == "table" and params.Icon then
+        params.Icon = nil
+    end
+    return originalNotify(params)
+end
+
 local function DefineTheme(name, colors)
     WindUI:AddTheme({
         Name = name,
