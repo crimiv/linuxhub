@@ -1,8 +1,8 @@
-local WindUI = AppleHub.WindUI
-local utils = AppleHub.Utils
-local config = AppleHub.Config
+local WindUI = LinuxHub.WindUI
+local utils = LinuxHub.Utils
+local config = LinuxHub.Config
 
-local CombatTab = AppleHub.Window:Tab({ Title = "Combat" })
+local CombatTab = LinuxHub.Window:Tab({ Title = "Combat" })
 
 local roundTimer = workspace:FindFirstChild("RoundTimerPart")
 
@@ -34,18 +34,18 @@ local function IsInLobby()
     return rootPart:IsDescendantOf(lobby)
 end
 
-local autoShootEnabled = AppleHub.Toggles.autoShootEnabled or false
+local autoShootEnabled = LinuxHub.Toggles.autoShootEnabled or false
 local AUTO_SHOOT_COOLDOWN = config.cooldowns.autoShoot
 local lastAutoShootTime = 0
 
 local function ShootAtMurderer(silent)
-    if _G.APPLE_HUB_UPDATING then return end
+    if _G.LINUXHUB_UPDATING then return end
     local localPlayer = game.Players.LocalPlayer
     if not localPlayer then
         if not silent then WindUI:Notify({ Title = "Error", Content = "Local player not found", Duration = 2 }) end
         return
     end
-    local murderer = AppleHub.GetCurrentMurderer()
+    local murderer = LinuxHub.GetCurrentMurderer()
     if not murderer then
         if not silent then WindUI:Notify({ Title = "Error", Content = "No murderer found", Duration = 2 }) end
         return
@@ -119,7 +119,7 @@ local function ShootAtMurderer(silent)
 end
 
 game:GetService("RunService").Heartbeat:Connect(function()
-    if _G.APPLE_HUB_UPDATING then return end
+    if _G.LINUXHUB_UPDATING then return end
     if autoShootEnabled then
         local now = tick()
         if now - lastAutoShootTime >= AUTO_SHOOT_COOLDOWN then
@@ -141,8 +141,8 @@ CombatTab:Toggle({
     Value = autoShootEnabled,
     Callback = function(state)
         autoShootEnabled = state
-        AppleHub.Toggles.autoShootEnabled = state
-        if AppleHub.SaveSettings then AppleHub.SaveSettings() end
+        LinuxHub.Toggles.autoShootEnabled = state
+        if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
         WindUI:Notify({
             Title = "Auto Shoot",
             Content = autoShootEnabled and "Enabled" or "Disabled",
@@ -157,7 +157,7 @@ CombatTab:Toggle({
 CombatTab:Button({
     Title = "Kill All",
     Callback = function()
-        if _G.APPLE_HUB_UPDATING then return end
+        if _G.LINUXHUB_UPDATING then return end
         local localPlayer = game.Players.LocalPlayer
         if not localPlayer then
             WindUI:Notify({ Title = "Error", Content = "Local player not found", Duration = 2 })
@@ -211,7 +211,7 @@ CombatTab:Button({
 CombatTab:Button({
     Title = "Kill All Except Sheriff",
     Callback = function()
-        if _G.APPLE_HUB_UPDATING then return end
+        if _G.LINUXHUB_UPDATING then return end
         local localPlayer = game.Players.LocalPlayer
         if not localPlayer then
             WindUI:Notify({ Title = "Error", Content = "Local player not found", Duration = 2 })
@@ -244,7 +244,7 @@ CombatTab:Button({
             WindUI:Notify({ Title = "Error", Content = "HandleTouched remote not found", Duration = 2 })
             return
         end
-        local sheriff = AppleHub.GetCurrentSheriff()
+        local sheriff = LinuxHub.GetCurrentSheriff()
         local killed = 0
         for _, player in pairs(game.Players:GetPlayers()) do
             if player == localPlayer then continue end
@@ -262,16 +262,16 @@ CombatTab:Button({
         else
             WindUI:Notify({ Title = "Kill All Except Sheriff", Content = "No valid players to kill", Duration = 2 })
         end
-        if AppleHub.SaveSettings then AppleHub.SaveSettings() end
+        if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
     end
 })
 
-local autoKillAllEnabled = AppleHub.Toggles.autoKillAllEnabled or false
+local autoKillAllEnabled = LinuxHub.Toggles.autoKillAllEnabled or false
 local AUTO_KILL_ALL_COOLDOWN = config.cooldowns.autoKillAll
 local lastAutoKillAllTime = 0
 
 local function KillAll()
-    if _G.APPLE_HUB_UPDATING then return end
+    if _G.LINUXHUB_UPDATING then return end
     local localPlayer = game.Players.LocalPlayer
     if not localPlayer then return end
     local knife = nil
@@ -306,7 +306,7 @@ local function KillAll()
 end
 
 game:GetService("RunService").Heartbeat:Connect(function()
-    if _G.APPLE_HUB_UPDATING then return end
+    if _G.LINUXHUB_UPDATING then return end
     if autoKillAllEnabled then
         local now = tick()
         if now - lastAutoKillAllTime >= AUTO_KILL_ALL_COOLDOWN then
@@ -321,8 +321,8 @@ CombatTab:Toggle({
     Value = autoKillAllEnabled,
     Callback = function(state)
         autoKillAllEnabled = state
-        AppleHub.Toggles.autoKillAllEnabled = state
-        if AppleHub.SaveSettings then AppleHub.SaveSettings() end
+        LinuxHub.Toggles.autoKillAllEnabled = state
+        if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
         WindUI:Notify({
             Title = "Auto Kill All",
             Content = autoKillAllEnabled and "Enabled" or "Disabled",
@@ -387,7 +387,7 @@ end
 local isTeleporting = false
 
 local function TeleportToGunDrop(gunDrop)
-    if _G.APPLE_HUB_UPDATING then return end
+    if _G.LINUXHUB_UPDATING then return end
     if not gunDrop or isTeleporting then return end
     if IsInLobby() then
         WindUI:Notify({ Title = "TP to Gun", Content = "Cannot teleport from lobby", Duration = 2 })
@@ -450,7 +450,7 @@ end
 CombatTab:Button({
     Title = "TP to Gun",
     Callback = function()
-        if _G.APPLE_HUB_UPDATING then return end
+        if _G.LINUXHUB_UPDATING then return end
         local localPlayer = game.Players.LocalPlayer
         if not localPlayer then
             WindUI:Notify({ Title = "Error", Content = "Local player not found", Duration = 2 })
@@ -478,7 +478,7 @@ CombatTab:Button({
     end
 })
 
-local autoGunTPEnabled = AppleHub.Toggles.autoGunTPEnabled or false
+local autoGunTPEnabled = LinuxHub.Toggles.autoGunTPEnabled or false
 local gunTPTimer = nil
 local gunTPLastCheck = 0
 local currentSheriff = nil
@@ -506,7 +506,7 @@ local function CleanupAutoGunTP()
 end
 
 local function TryTeleportToGun()
-    if _G.APPLE_HUB_UPDATING then return end
+    if _G.LINUXHUB_UPDATING then return end
     if not autoGunTPEnabled or isTeleporting then return end
     if IsInLobby() then return end
     if not IsPlayerAlive() or not IsRoundActive() then return end
@@ -525,7 +525,7 @@ local function SetupAutoGunTP()
     TryTeleportToGun()
     gunTPLastCheck = 0
     gunTPTimer = game:GetService("RunService").Stepped:Connect(function()
-        if _G.APPLE_HUB_UPDATING then return end
+        if _G.LINUXHUB_UPDATING then return end
         if not autoGunTPEnabled then return end
         local now = tick()
         if now - gunTPLastCheck < 0.5 then return end
@@ -535,14 +535,14 @@ local function SetupAutoGunTP()
     local map = currentMap and workspace:FindFirstChild(currentMap)
     if map then
         mapChildAddedConnection = map.ChildAdded:Connect(function(child)
-            if _G.APPLE_HUB_UPDATING then return end
+            if _G.LINUXHUB_UPDATING then return end
             if child.Name == "GunDrop" then
                 TryTeleportToGun()
             end
         end)
     end
     currentSheriff = nil
-    for player, role in pairs(AppleHub.playerRoles) do
+    for player, role in pairs(LinuxHub.playerRoles) do
         if role == "sheriff" then
             currentSheriff = player
             break
@@ -550,7 +550,7 @@ local function SetupAutoGunTP()
     end
     if currentSheriff then
         local function onSheriffCharacterRemoved()
-            if _G.APPLE_HUB_UPDATING then return end
+            if _G.LINUXHUB_UPDATING then return end
             task.wait(0.1)
             TryTeleportToGun()
         end
@@ -558,7 +558,7 @@ local function SetupAutoGunTP()
             sheriffCharacterRemovedConnection = currentSheriff.Character:WaitForChild("Humanoid").Died:Connect(onSheriffCharacterRemoved)
         end
         sheriffPlayerRemovingConnection = currentSheriff.AncestryChanged:Connect(function()
-            if _G.APPLE_HUB_UPDATING then return end
+            if _G.LINUXHUB_UPDATING then return end
             if not currentSheriff.Parent then
                 task.wait(0.1)
                 TryTeleportToGun()
@@ -572,8 +572,8 @@ CombatTab:Toggle({
     Value = autoGunTPEnabled,
     Callback = function(state)
         autoGunTPEnabled = state
-        AppleHub.Toggles.autoGunTPEnabled = state
-        if AppleHub.SaveSettings then AppleHub.SaveSettings() end
+        LinuxHub.Toggles.autoGunTPEnabled = state
+        if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
         WindUI:Notify({
             Title = "Auto TP to Gun",
             Content = autoGunTPEnabled and "Enabled" or "Disabled",
@@ -587,13 +587,13 @@ CombatTab:Toggle({
     end
 })
 
-AppleHub.DisableAll = function()
+LinuxHub.DisableAll = function()
     autoShootEnabled = false
-    AppleHub.Toggles.autoShootEnabled = false
+    LinuxHub.Toggles.autoShootEnabled = false
     autoKillAllEnabled = false
-    AppleHub.Toggles.autoKillAllEnabled = false
+    LinuxHub.Toggles.autoKillAllEnabled = false
     autoGunTPEnabled = false
-    AppleHub.Toggles.autoGunTPEnabled = false
-    if AppleHub.SaveSettings then AppleHub.SaveSettings() end
+    LinuxHub.Toggles.autoGunTPEnabled = false
+    if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
     CleanupAutoGunTP()
 end

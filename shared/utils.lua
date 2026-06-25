@@ -1,6 +1,6 @@
-local AppleHub = {}
+local LinuxHub = {}
 
-function AppleHub.GetPlayerFromArg(arg)
+function LinuxHub.GetPlayerFromArg(arg)
     if typeof(arg) == "Instance" and arg:IsA("Player") then
         return arg
     elseif type(arg) == "string" then
@@ -9,7 +9,7 @@ function AppleHub.GetPlayerFromArg(arg)
     return nil
 end
 
-function AppleHub.PlayerHasTool(player, toolName)
+function LinuxHub.PlayerHasTool(player, toolName)
     if not player then return false end
     local backpack = player:FindFirstChild("Backpack")
     if backpack then
@@ -30,7 +30,7 @@ function AppleHub.PlayerHasTool(player, toolName)
     return false
 end
 
-function AppleHub.GetPlatform()
+function LinuxHub.GetPlatform()
     if _G.ExecutorFunctionality and _G.ExecutorFunctionality.IsMobile then
         if _G.ExecutorFunctionality.IsMobile() then
             return "Mobile"
@@ -39,7 +39,7 @@ function AppleHub.GetPlatform()
     return "PC"
 end
 
-function AppleHub.GetExecutor()
+function LinuxHub.GetExecutor()
     if getexecutorname then
         local success, name = pcall(getexecutorname)
         if success and name then
@@ -61,7 +61,7 @@ function AppleHub.GetExecutor()
     return "Unknown"
 end
 
-function AppleHub.CreateStatusTab(Window)
+function LinuxHub.CreateStatusTab(Window)
     if not Window then return end
     
     local StatusTab = Window:CreateTab({
@@ -69,8 +69,8 @@ function AppleHub.CreateStatusTab(Window)
         Icon = "rbxassetid://15898349158"
     })
     
-    local platform = AppleHub.GetPlatform()
-    local executor = AppleHub.GetExecutor()
+    local platform = LinuxHub.GetPlatform()
+    local executor = LinuxHub.GetExecutor()
     
     StatusTab:Paragraph({
         Title = "Platform",
@@ -83,4 +83,4 @@ function AppleHub.CreateStatusTab(Window)
     })
 end
 
-return AppleHub
+return LinuxHub

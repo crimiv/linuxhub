@@ -1,10 +1,10 @@
-local WindUI = AppleHub.WindUI
-local utils = AppleHub.Utils
-local config = AppleHub.Config
+local WindUI = LinuxHub.WindUI
+local utils = LinuxHub.Utils
+local config = LinuxHub.Config
 
-local VisualTab = AppleHub.Window:Tab({ Title = "Visual" })
+local VisualTab = LinuxHub.Window:Tab({ Title = "Visual" })
 
-local espEnabled = AppleHub.Toggles.espEnabled or false
+local espEnabled = LinuxHub.Toggles.espEnabled or false
 local highlightInstances = {}
 local espUpdateCooldown = 0
 
@@ -29,7 +29,7 @@ local function ClearESP()
 end
 
 local function UpdateESP()
-    if _G.APPLE_HUB_UPDATING then
+    if _G.LINUXHUB_UPDATING then
         ClearESP()
         return
     end
@@ -80,36 +80,36 @@ local setSheriffRemote = extras and extras:FindFirstChild("SetSheriff")
 
 if setMurdererRemote and setMurdererRemote:IsA("RemoteEvent") then
     setMurdererRemote.OnClientEvent:Connect(function(...)
-        if _G.APPLE_HUB_UPDATING then return end
+        if _G.LINUXHUB_UPDATING then return end
     end)
 end
 
 if setSheriffRemote and setSheriffRemote:IsA("RemoteEvent") then
     setSheriffRemote.OnClientEvent:Connect(function(...)
-        if _G.APPLE_HUB_UPDATING then return end
+        if _G.LINUXHUB_UPDATING then return end
     end)
 end
 
 local roundTimer = workspace:FindFirstChild("RoundTimerPart")
 if roundTimer then
     roundTimer:GetAttributeChangedSignal("Time"):Connect(function()
-        if _G.APPLE_HUB_UPDATING then return end
+        if _G.LINUXHUB_UPDATING then return end
     end)
 end
 
 if espEnabled then UpdateESP() end
 
 game.Players.PlayerAdded:Connect(function(player)
-    if _G.APPLE_HUB_UPDATING then return end
+    if _G.LINUXHUB_UPDATING then return end
     player.CharacterAdded:Connect(function()
-        if _G.APPLE_HUB_UPDATING then return end
+        if _G.LINUXHUB_UPDATING then return end
         task.wait(0.5)
         UpdateESP()
     end)
 end)
 
 game.Players.PlayerRemoving:Connect(function(player)
-    if _G.APPLE_HUB_UPDATING then return end
+    if _G.LINUXHUB_UPDATING then return end
     if highlightInstances[player] then
         highlightInstances[player]:Destroy()
         highlightInstances[player] = nil
@@ -117,7 +117,7 @@ game.Players.PlayerRemoving:Connect(function(player)
 end)
 
 game:GetService("RunService").Heartbeat:Connect(function()
-    if _G.APPLE_HUB_UPDATING then return end
+    if _G.LINUXHUB_UPDATING then return end
     if espEnabled then
         local now = tick()
         if now - espUpdateCooldown >= 0.3 then
@@ -132,8 +132,8 @@ VisualTab:Toggle({
     Value = espEnabled,
     Callback = function(state)
         espEnabled = state
-        AppleHub.Toggles.espEnabled = state
-        if AppleHub.SaveSettings then AppleHub.SaveSettings() end
+        LinuxHub.Toggles.espEnabled = state
+        if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
         WindUI:Notify({
             Title = "ESP Highlight",
             Content = espEnabled and "ESP Enabled" or "ESP Disabled",
@@ -147,12 +147,12 @@ VisualTab:Toggle({
     end
 })
 
-AppleHub.GetCurrentMurderer = GetCurrentMurderer
-AppleHub.GetCurrentSheriff = GetCurrentSheriff
+LinuxHub.GetCurrentMurderer = GetCurrentMurderer
+LinuxHub.GetCurrentSheriff = GetCurrentSheriff
 
-AppleHub.DisableAll = function()
+LinuxHub.DisableAll = function()
     espEnabled = false
-    AppleHub.Toggles.espEnabled = false
-    if AppleHub.SaveSettings then AppleHub.SaveSettings() end
+    LinuxHub.Toggles.espEnabled = false
+    if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
     ClearESP()
 end

@@ -1,8 +1,8 @@
-local WindUI = AppleHub.WindUI
-local utils = AppleHub.Utils
-local config = AppleHub.Config
+local WindUI = LinuxHub.WindUI
+local utils = LinuxHub.Utils
+local config = LinuxHub.Config
 
-local TrollTab = AppleHub.Window:Tab({ Title = "Troll" })
+local TrollTab = LinuxHub.Window:Tab({ Title = "Troll" })
 
 local function IsSeated(player)
     local char = player.Character
@@ -11,7 +11,7 @@ local function IsSeated(player)
 end
 
 local function FlingPlayer(target, silent)
-    if _G.APPLE_HUB_UPDATING then return false end
+    if _G.LINUXHUB_UPDATING then return false end
     if not target or target == game.Players.LocalPlayer then
         if not silent then WindUI:Notify({ Title = "Fling", Content = "Invalid target", Duration = 2 }) end
         return false
@@ -44,7 +44,7 @@ local function FlingPlayer(target, silent)
     bav.Parent = hrp
     local timeout = tick() + 3
     while tick() < timeout and not launched do
-        if _G.APPLE_HUB_UPDATING then break end
+        if _G.LINUXHUB_UPDATING then break end
         if not target.Parent or tHum.Health <= 0 then break end
         hrp.CFrame = tHrp.CFrame
         if (tHrp.Position - targetStartPos).Magnitude > 60 or tHrp.Velocity.Magnitude > 180 then
@@ -70,8 +70,8 @@ end
 TrollTab:Button({
     Title = "Fling Murderer",
     Callback = function()
-        if _G.APPLE_HUB_UPDATING then return end
-        local murderer = AppleHub.GetCurrentMurderer()
+        if _G.LINUXHUB_UPDATING then return end
+        local murderer = LinuxHub.GetCurrentMurderer()
         if murderer then
             FlingPlayer(murderer, false)
         else
@@ -83,8 +83,8 @@ TrollTab:Button({
 TrollTab:Button({
     Title = "Fling Sheriff",
     Callback = function()
-        if _G.APPLE_HUB_UPDATING then return end
-        local sheriff = AppleHub.GetCurrentSheriff()
+        if _G.LINUXHUB_UPDATING then return end
+        local sheriff = LinuxHub.GetCurrentSheriff()
         if sheriff then
             FlingPlayer(sheriff, false)
         else
@@ -93,8 +93,8 @@ TrollTab:Button({
     end
 })
 
-local autoFlingMurdererEnabled = AppleHub.Toggles.autoFlingMurdererEnabled or false
-local autoFlingSheriffEnabled = AppleHub.Toggles.autoFlingSheriffEnabled or false
+local autoFlingMurdererEnabled = LinuxHub.Toggles.autoFlingMurdererEnabled or false
+local autoFlingSheriffEnabled = LinuxHub.Toggles.autoFlingSheriffEnabled or false
 local autoFlingMurdererCoroutine = nil
 local autoFlingSheriffCoroutine = nil
 
@@ -103,8 +103,8 @@ TrollTab:Toggle({
     Value = autoFlingMurdererEnabled,
     Callback = function(state)
         autoFlingMurdererEnabled = state
-        AppleHub.Toggles.autoFlingMurdererEnabled = state
-        if AppleHub.SaveSettings then AppleHub.SaveSettings() end
+        LinuxHub.Toggles.autoFlingMurdererEnabled = state
+        if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
         WindUI:Notify({
             Title = "Auto Fling Murderer",
             Content = autoFlingMurdererEnabled and "Enabled" or "Disabled",
@@ -116,8 +116,8 @@ TrollTab:Toggle({
             end
             autoFlingMurdererCoroutine = coroutine.create(function()
                 while autoFlingMurdererEnabled do
-                    if _G.APPLE_HUB_UPDATING then break end
-                    local target = AppleHub.GetCurrentMurderer()
+                    if _G.LINUXHUB_UPDATING then break end
+                    local target = LinuxHub.GetCurrentMurderer()
                     if target then
                         local launched = FlingPlayer(target, true)
                         if launched then
@@ -144,8 +144,8 @@ TrollTab:Toggle({
     Value = autoFlingSheriffEnabled,
     Callback = function(state)
         autoFlingSheriffEnabled = state
-        AppleHub.Toggles.autoFlingSheriffEnabled = state
-        if AppleHub.SaveSettings then AppleHub.SaveSettings() end
+        LinuxHub.Toggles.autoFlingSheriffEnabled = state
+        if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
         WindUI:Notify({
             Title = "Auto Fling Sheriff",
             Content = autoFlingSheriffEnabled and "Enabled" or "Disabled",
@@ -157,8 +157,8 @@ TrollTab:Toggle({
             end
             autoFlingSheriffCoroutine = coroutine.create(function()
                 while autoFlingSheriffEnabled do
-                    if _G.APPLE_HUB_UPDATING then break end
-                    local target = AppleHub.GetCurrentSheriff()
+                    if _G.LINUXHUB_UPDATING then break end
+                    local target = LinuxHub.GetCurrentSheriff()
                     if target then
                         local launched = FlingPlayer(target, true)
                         if launched then
@@ -221,7 +221,7 @@ CreateFlingDropdown()
 TrollTab:Button({
     Title = "Refresh Players",
     Callback = function()
-        if _G.APPLE_HUB_UPDATING then return end
+        if _G.LINUXHUB_UPDATING then return end
         CreateFlingDropdown()
         WindUI:Notify({ Title = "Fling Player", Content = "Player list refreshed", Duration = 2 })
     end
@@ -230,7 +230,7 @@ TrollTab:Button({
 TrollTab:Button({
     Title = "Fling Selected Player",
     Callback = function()
-        if _G.APPLE_HUB_UPDATING then return end
+        if _G.LINUXHUB_UPDATING then return end
         if not selectedFlingPlayer or selectedFlingPlayer == "No other players" then
             WindUI:Notify({ Title = "Error", Content = "No valid player selected", Duration = 2 })
             return
@@ -242,7 +242,7 @@ TrollTab:Button({
         end
         task.spawn(function()
             while targetPlayer and targetPlayer.Parent do
-                if _G.APPLE_HUB_UPDATING then break end
+                if _G.LINUXHUB_UPDATING then break end
                 local launched = FlingPlayer(targetPlayer, true)
                 if launched then
                     break
@@ -253,7 +253,7 @@ TrollTab:Button({
     end
 })
 
-local loopFlingSelectedEnabled = AppleHub.Toggles.loopFlingSelectedEnabled or false
+local loopFlingSelectedEnabled = LinuxHub.Toggles.loopFlingSelectedEnabled or false
 local loopFlingSelectedCoroutine = nil
 
 TrollTab:Toggle({
@@ -261,8 +261,8 @@ TrollTab:Toggle({
     Value = loopFlingSelectedEnabled,
     Callback = function(state)
         loopFlingSelectedEnabled = state
-        AppleHub.Toggles.loopFlingSelectedEnabled = state
-        if AppleHub.SaveSettings then AppleHub.SaveSettings() end
+        LinuxHub.Toggles.loopFlingSelectedEnabled = state
+        if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
         WindUI:Notify({
             Title = "Loop Fling Selected Player",
             Content = loopFlingSelectedEnabled and "Enabled" or "Disabled",
@@ -274,7 +274,7 @@ TrollTab:Toggle({
             end
             loopFlingSelectedCoroutine = coroutine.create(function()
                 while loopFlingSelectedEnabled do
-                    if _G.APPLE_HUB_UPDATING then break end
+                    if _G.LINUXHUB_UPDATING then break end
                     if selectedFlingPlayer and selectedFlingPlayer ~= "No other players" then
                         local targetPlayer = game.Players:FindFirstChild(selectedFlingPlayer)
                         if targetPlayer then
@@ -304,14 +304,14 @@ TrollTab:Toggle({
 game.Players.PlayerAdded:Connect(CreateFlingDropdown)
 game.Players.PlayerRemoving:Connect(CreateFlingDropdown)
 
-AppleHub.DisableAll = function()
+LinuxHub.DisableAll = function()
     autoFlingMurdererEnabled = false
-    AppleHub.Toggles.autoFlingMurdererEnabled = false
+    LinuxHub.Toggles.autoFlingMurdererEnabled = false
     autoFlingSheriffEnabled = false
-    AppleHub.Toggles.autoFlingSheriffEnabled = false
+    LinuxHub.Toggles.autoFlingSheriffEnabled = false
     loopFlingSelectedEnabled = false
-    AppleHub.Toggles.loopFlingSelectedEnabled = false
-    if AppleHub.SaveSettings then AppleHub.SaveSettings() end
+    LinuxHub.Toggles.loopFlingSelectedEnabled = false
+    if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
     if autoFlingMurdererCoroutine then
         autoFlingMurdererCoroutine = nil
     end

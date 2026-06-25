@@ -2,7 +2,7 @@ local function Fetch(url)
     return game:HttpGet(url)
 end
 
-local BASE_URL = "https://raw.githubusercontent.com/crimiv/applehub/main/"
+local BASE_URL = "https://raw.githubusercontent.com/crimiv/linuxhub/main/"
 
 local function LoadScript(name)
     local script = Fetch(BASE_URL .. name)
@@ -22,21 +22,21 @@ else
     version = "1.0.0"
 end
 
-APPLE_HUB_VERSION = version
+LINUXHUB_VERSION = version
 
 local function PerformUpdate(newVersion)
-    _G.APPLE_HUB_UPDATING = true
-    if AppleHub then
-        AppleHub.Toggles = AppleHub.Toggles or {}
-        _G.APPLE_HUB_STATES = AppleHub.Toggles
-        if AppleHub.Window then
-            AppleHub.Window:Close()
+    _G.LINUXHUB_UPDATING = true
+    if LinuxHub then
+        LinuxHub.Toggles = LinuxHub.Toggles or {}
+        _G.LINUXHUB_STATES = LinuxHub.Toggles
+        if LinuxHub.Window then
+            LinuxHub.Window:Close()
         end
-        if AppleHub.DisableAll then
-            AppleHub.DisableAll()
+        if LinuxHub.DisableAll then
+            LinuxHub.DisableAll()
         end
     end
-    local WindUI = AppleHub and AppleHub.WindUI
+    local WindUI = LinuxHub and LinuxHub.WindUI
     if WindUI then
         WindUI:Notify({
             Title = "Updating",
@@ -51,19 +51,19 @@ local function PerformUpdate(newVersion)
         })
     end
     task.wait(1)
-    _G.APPLE_HUB_UPDATING = false
+    _G.LINUXHUB_UPDATING = false
     loadstring(game:HttpGet(BASE_URL .. "main.lua"))()
 end
 
 task.spawn(function()
     while true do
         task.wait(1)
-        if _G.APPLE_HUB_UPDATING then break end
+        if _G.LINUXHUB_UPDATING then break end
         local success, newVersion = pcall(function()
             local raw = game:HttpGet(BASE_URL .. "version.txt")
             return raw:gsub("%s+", "")
         end)
-        if success and newVersion and newVersion ~= APPLE_HUB_VERSION then
+        if success and newVersion and newVersion ~= LINUXHUB_VERSION then
             PerformUpdate(newVersion)
             break
         end

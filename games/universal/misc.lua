@@ -1,8 +1,8 @@
-local WindUI = AppleHub.WindUI
+local WindUI = LinuxHub.WindUI
 
-local MiscTab = AppleHub.Window:Tab({ Title = "Misc" })
+local MiscTab = LinuxHub.Window:Tab({ Title = "Misc" })
 
-local antiFlingEnabled = AppleHub.Toggles.antiFlingEnabled or false
+local antiFlingEnabled = LinuxHub.Toggles.antiFlingEnabled or false
 local antiFlingHeartbeat = nil
 
 local function AntiFlingLoop()
@@ -56,8 +56,8 @@ MiscTab:Toggle({
     Value = antiFlingEnabled,
     Callback = function(state)
         antiFlingEnabled = state
-        AppleHub.Toggles.antiFlingEnabled = state
-        if AppleHub.SaveSettings then AppleHub.SaveSettings() end
+        LinuxHub.Toggles.antiFlingEnabled = state
+        if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
         WindUI:Notify({
             Title = "Anti-Fling",
             Content = antiFlingEnabled and "Enabled" or "Disabled",
@@ -67,10 +67,10 @@ MiscTab:Toggle({
     end
 })
 
-AppleHub.DisableAll = function()
+LinuxHub.DisableAll = function()
     antiFlingEnabled = false
-    AppleHub.Toggles.antiFlingEnabled = false
-    if AppleHub.SaveSettings then AppleHub.SaveSettings() end
+    LinuxHub.Toggles.antiFlingEnabled = false
+    if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
     if antiFlingHeartbeat then
         antiFlingHeartbeat:Disconnect()
         antiFlingHeartbeat = nil

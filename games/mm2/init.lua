@@ -1,4 +1,4 @@
-local BASE_URL = "https://raw.githubusercontent.com/crimiv/applehub/main/"
+local BASE_URL = "https://raw.githubusercontent.com/crimiv/linuxhub/main/"
 
 local function LoadScript(name)
     local script = game:HttpGet(BASE_URL .. name)
@@ -30,12 +30,12 @@ local WindUI = LoadScript("shared/windui.lua")
 local utils = LoadScript("shared/utils.lua")
 local config = LoadScript("shared/config.lua")
 
-AppleHub = AppleHub or {}
-AppleHub.WindUI = WindUI
-AppleHub.Utils = utils
-AppleHub.Config = config
-AppleHub.Toggles = AppleHub.Toggles or {}
-AppleHub.SettingsFile = "LinuxHub/Settings.json"
+LinuxHub = LinuxHub or {}
+LinuxHub.WindUI = WindUI
+LinuxHub.Utils = utils
+LinuxHub.Config = config
+LinuxHub.Toggles = LinuxHub.Toggles or {}
+LinuxHub.SettingsFile = "LinuxHub/Settings.json"
 
 local function SaveSettings()
     local success, result = pcall(function()
@@ -43,25 +43,25 @@ local function SaveSettings()
         makefolder("LinuxHub")
         if not writefile then return end
         local data = {
-            toggles = AppleHub.Toggles,
-            theme = AppleHub.CurrentTheme or "Linux",
+            toggles = LinuxHub.Toggles,
+            theme = LinuxHub.CurrentTheme or "Linux",
         }
-        writefile(AppleHub.SettingsFile, game:GetService("HttpService"):JSONEncode(data))
+        writefile(LinuxHub.SettingsFile, game:GetService("HttpService"):JSONEncode(data))
     end)
 end
 
 local function LoadSettings()
     local success, result = pcall(function()
         if not isfile then return end
-        if isfile(AppleHub.SettingsFile) then
-            local data = game:GetService("HttpService"):JSONDecode(readfile(AppleHub.SettingsFile))
+        if isfile(LinuxHub.SettingsFile) then
+            local data = game:GetService("HttpService"):JSONDecode(readfile(LinuxHub.SettingsFile))
             if data and data.toggles then
                 for key, value in pairs(data.toggles) do
-                    AppleHub.Toggles[key] = value
+                    LinuxHub.Toggles[key] = value
                 end
             end
             if data and data.theme then
-                AppleHub.CurrentTheme = data.theme
+                LinuxHub.CurrentTheme = data.theme
             end
         end
     end)
@@ -69,7 +69,7 @@ end
 
 LoadSettings()
 
-local version = APPLE_HUB_VERSION or "1.0.0"
+local version = LINUXHUB_VERSION or "1.0.0"
 
 local Window = WindUI:CreateWindow({
     Title = "Linux Hub v" .. version,
@@ -79,7 +79,7 @@ local Window = WindUI:CreateWindow({
     MinSize = Vector2.new(560, 350),
     MaxSize = Vector2.new(850, 560),
     Transparent = true,
-    Theme = AppleHub.CurrentTheme or "Linux",
+    Theme = LinuxHub.CurrentTheme or "Linux",
     Resizable = true,
     SideBarWidth = 200,
     HideSearchBar = true,
@@ -88,12 +88,12 @@ local Window = WindUI:CreateWindow({
 
 Window:SetToggleKey(Enum.KeyCode.K)
 
-AppleHub.Window = Window
-AppleHub.SaveSettings = SaveSettings
-AppleHub.LoadSettings = LoadSettings
+LinuxHub.Window = Window
+LinuxHub.SaveSettings = SaveSettings
+LinuxHub.LoadSettings = LoadSettings
 
-if AppleHub.CreateStatusTab then
-    AppleHub.CreateStatusTab(Window)
+if LinuxHub.CreateStatusTab then
+    LinuxHub.CreateStatusTab(Window)
 end
 
 LoadScript("games/mm2/esp.lua")
@@ -103,15 +103,15 @@ LoadScript("games/mm2/misc.lua")
 LoadScript("games/mm2/teleport.lua")
 LoadScript("games/mm2/settings.lua")
 
-if _G.APPLE_HUB_STATES then
-    for key, value in pairs(_G.APPLE_HUB_STATES) do
-        AppleHub.Toggles[key] = value
+if _G.LINUXHUB_STATES then
+    for key, value in pairs(_G.LINUXHUB_STATES) do
+        LinuxHub.Toggles[key] = value
     end
-    _G.APPLE_HUB_STATES = nil
+    _G.LINUXHUB_STATES = nil
 end
 
-if AppleHub.RestoreStates then
-    AppleHub.RestoreStates()
+if LinuxHub.RestoreStates then
+    LinuxHub.RestoreStates()
 end
 
 SaveSettings()

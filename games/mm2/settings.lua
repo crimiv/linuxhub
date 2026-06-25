@@ -1,10 +1,10 @@
-local WindUI = AppleHub.WindUI
-local config = AppleHub.Config
+local WindUI = LinuxHub.WindUI
+local config = LinuxHub.Config
 
-local SettingsTab = AppleHub.Window:Tab({ Title = "Settings" })
+local SettingsTab = LinuxHub.Window:Tab({ Title = "Settings" })
 
 local themes = config.themes or {"Silver", "Dark", "Light", "Neon"}
-local currentTheme = AppleHub.CurrentTheme or "Silver"
+local currentTheme = LinuxHub.CurrentTheme or "Silver"
 
 SettingsTab:Dropdown({
     Title = "Theme",
@@ -12,9 +12,9 @@ SettingsTab:Dropdown({
     Default = currentTheme,
     Callback = function(value)
         currentTheme = value
-        AppleHub.CurrentTheme = value
+        LinuxHub.CurrentTheme = value
         WindUI:SetTheme(value)
-        if AppleHub.SaveSettings then AppleHub.SaveSettings() end
+        if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
         WindUI:Notify({ Title = "Theme", Content = "Switched to " .. value, Duration = 2 })
     end
 })

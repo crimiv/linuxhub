@@ -1,6 +1,6 @@
-local WindUI = AppleHub.WindUI
+local WindUI = LinuxHub.WindUI
 
-local TeleportTab = AppleHub.Window:Tab({ Title = "Teleport" })
+local TeleportTab = LinuxHub.Window:Tab({ Title = "Teleport" })
 
 local function TeleportToLobby()
     local localPlayer = game.Players.LocalPlayer

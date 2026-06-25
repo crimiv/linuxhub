@@ -1,11 +1,11 @@
-local WindUI = AppleHub.WindUI
-local utils = AppleHub.Utils
-local config = AppleHub.Config
+local WindUI = LinuxHub.WindUI
+local utils = LinuxHub.Utils
+local config = LinuxHub.Config
 
-local CombatTab = AppleHub.Window:Tab({ Title = "Combat" })
+local CombatTab = LinuxHub.Window:Tab({ Title = "Combat" })
 
 local Config = {
-    Enabled = AppleHub.Toggles.silentAimEnabled or false,
+    Enabled = LinuxHub.Toggles.silentAimEnabled or false,
     Distance = 30,
     TargetMode = "cursor",
 }
@@ -20,7 +20,7 @@ local camera = Workspace.CurrentCamera
 local targetPosition = nil
 
 local function updateTarget()
-    if _G.APPLE_HUB_UPDATING then
+    if _G.LINUXHUB_UPDATING then
         targetPosition = nil
         return
     end
@@ -78,7 +78,7 @@ local function updateTarget()
 end
 
 local oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
-    if _G.APPLE_HUB_UPDATING then return oldNamecall(self, ...) end
+    if _G.LINUXHUB_UPDATING then return oldNamecall(self, ...) end
     local method = getnamecallmethod()
     if Config.Enabled and targetPosition and self == Workspace and method == "Raycast" then
         local args = { ... }
@@ -99,8 +99,8 @@ CombatTab:Toggle({
     Value = Config.Enabled,
     Callback = function(state)
         Config.Enabled = state
-        AppleHub.Toggles.silentAimEnabled = state
-        if AppleHub.SaveSettings then AppleHub.SaveSettings() end
+        LinuxHub.Toggles.silentAimEnabled = state
+        if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
         WindUI:Notify({
             Title = "Silent Aim",
             Content = Config.Enabled and "Enabled" or "Disabled",
@@ -109,9 +109,9 @@ CombatTab:Toggle({
     end
 })
 
-AppleHub.DisableAll = function()
+LinuxHub.DisableAll = function()
     Config.Enabled = false
-    AppleHub.Toggles.silentAimEnabled = false
-    if AppleHub.SaveSettings then AppleHub.SaveSettings() end
+    LinuxHub.Toggles.silentAimEnabled = false
+    if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
     targetPosition = nil
 end
