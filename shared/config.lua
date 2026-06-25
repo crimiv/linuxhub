@@ -9,5 +9,12 @@ return {
         autoKillAll = 1,
         autoFling = 2,
     },
-    themes = {"Silver", "Dark", "Light", "Neon"},
+    themes = {
+        "Silver", "Dark", "Light", "Neon",
+        "Ocean", "Forest", "Sunset", "Midnight",
+        "Candy", "Royal", "Matrix", "Coffee",
+        "Lavender", "Mint", "Coral", "Cyber",
+        "Pastel", "Fire", "Ice", "Galaxy",
+        "Rose", "Sky", "Earth", "Grape"
+    },
 }
