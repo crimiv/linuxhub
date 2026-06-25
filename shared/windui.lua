@@ -4,8 +4,9 @@ local WindUI = (function()
     local patched = raw
         :gsub('New%s*%(%s*"ImageLabel"%s*,', 'New("Frame",')
         :gsub('New%(%s*"ImageLabel"%s*,', 'New("Frame",')
-        :gsub('New%s*%(%s*"ImageLabel"', 'New("Frame"')
-        :gsub('New%(%s*"ImageLabel"', 'New("Frame"')
+        :gsub('Instance%.new%s*%(%s*"ImageLabel"%s*,', 'Instance.new("Frame",')
+        :gsub('Instance%.new%(%s*"ImageLabel"%s*,', 'Instance.new("Frame",')
+        :gsub('"ImageLabel"%s*,', '"Frame",')
     return loadstring(patched)()
 end)()
 
