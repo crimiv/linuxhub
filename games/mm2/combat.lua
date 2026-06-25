@@ -512,7 +512,7 @@ local function TryTeleportToGun()
     if not IsPlayerAlive() or not IsRoundActive() then return end
     local localPlayer = game.Players.LocalPlayer
     if not localPlayer then return end
-    if utils.PlayerHasTool(localPlayer, "Knife") then return end
+    if utils.PlayerHasTool(localPlayer, "Knife") or utils.PlayerHasTool(localPlayer, "Gun") then return end
     local gd = GetClosestGunDrop()
     if gd then
         TeleportToGunDrop(gd)

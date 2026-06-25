@@ -195,7 +195,9 @@ local function FlingPlayer(target, silent)
                 offset = off
             end
         end
-        hrp.CFrame = tHrp.CFrame * CFrame.new(offset)
+        local insideOffset = Vector3.new(offset.X * 0.2, math.clamp(offset.Y * 0.4, -1.5, 1.5), offset.Z * 0.2)
+        local roll = CFrame.Angles(math.rad(offset.X * 10), math.rad(offset.Y * 10), math.rad(offset.Z * 10))
+        hrp.CFrame = tHrp.CFrame * CFrame.new(insideOffset) * roll
         if (tHrp.Position - targetStartPos).Magnitude > 60 or tHrp.Velocity.Magnitude > 180 then
             launched = true
             break
