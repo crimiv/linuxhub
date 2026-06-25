@@ -1,8 +1,8 @@
-local WindUI = SilverHub.WindUI
-local utils = SilverHub.Utils
-local config = SilverHub.Config
+local WindUI = AppleHub.WindUI
+local utils = AppleHub.Utils
+local config = AppleHub.Config
 
-local CombatTab = SilverHub.Window:Tab({ Title = "Combat" })
+local CombatTab = AppleHub.Window:Tab({ Title = "Combat" })
 
 local Config = {
     Enabled = false,
@@ -94,5 +94,10 @@ CombatTab:Toggle({
     Value = false,
     Callback = function(state)
         Config.Enabled = state
+        WindUI:Notify({
+            Title = "Silent Aim",
+            Content = Config.Enabled and "Enabled" or "Disabled",
+            Duration = 2,
+        })
     end
 })
