@@ -9,7 +9,7 @@ local function LoadScript(name)
     assert(loadstring(script))()
 end
 
-local bypassScript = Fetch(BASE_URL .. "shared/adonis_bypass.lua")
+local bypassScript = Fetch(BASE_URL .. "shared/adonisbypass.lua")
 local bypassFn = loadstring(bypassScript)
 if bypassFn then
     bypassFn()
