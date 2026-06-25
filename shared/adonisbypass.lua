@@ -19,7 +19,6 @@ return function()
 
     local function smartWait()
         local startTime = tick()
-        
         while tick() - startTime < CONFIG.DELAY do
             local adonisReady = false
             pcall(function()
@@ -30,12 +29,10 @@ return function()
                     end
                 end
             end)
-            
             if adonisReady and tick() - startTime > 8 then
                 task.wait(3)
                 break
             end
-            
             task.wait(1)
         end
     end
@@ -48,11 +45,9 @@ return function()
     pcall(function()
         local mt = getrawmetatable(game)
         setreadonly(mt, false)
-        
         oldMeta.__index = mt.__index
         oldMeta.__newindex = mt.__newindex
         oldMeta.__namecall = mt.__namecall
-        
         metaProtected = true
         setreadonly(mt, true)
     end)
@@ -63,13 +58,11 @@ return function()
             "AntiCheat", "Security", "LogExploit",
             "StaminaChange", "AntiToolClone"
         }
-        
         local suspiciousPatterns = {
             "detect", "kick", "ban", "log", "report",
             "exploit", "cheat", "hack", "inject", "security",
             "anticheat", "admin", "stamina", "antitool"
         }
-        
         local function checkcaller()
             local callingScript = getcallingscript()
             if callingScript == nil then
@@ -79,7 +72,6 @@ return function()
                 game:IsDescendantOf(callingScript)
             end)
         end
-        
         if not getgenv().namecallHooked then
             getgenv().namecallHooked = true
             pcall(function()
@@ -87,17 +79,14 @@ return function()
                 if mt and mt.__namecall then
                     local originalNamecall = mt.__namecall
                     setreadonly(mt, false)
-                    
                     mt.__namecall = newcclosure(function(self, ...)
                         local args = {...}
                         local method = getnamecallmethod()
-                        
                         if method == "Kick" then
                             return nil
                         end
-                        
-                        if method == "GetPropertyChangedSignal" or 
-                           method == "GetAttribute" or 
+                        if method == "GetPropertyChangedSignal" or
+                           method == "GetAttribute" or
                            method == "SetAttribute" or
                            method == "FindFirstChild" or
                            method == "WaitForChild" or
@@ -109,15 +98,13 @@ return function()
                            method == "GetService" then
                             return originalNamecall(self, table.unpack(args))
                         end
-                        
                         if method == "FireServer" or method == "InvokeServer" then
-                            local success2, remoteName = pcall(function() 
+                            local success2, remoteName = pcall(function()
                                 if self and typeof(self) == "Instance" then
                                     return tostring(self.Name):lower()
                                 end
                                 return ""
                             end)
-                            
                             if success2 and remoteName and remoteName ~= "" then
                                 for _, blocked in ipairs(blockedRemotes) do
                                     if remoteName:find(blocked:lower(), 1, true) then
@@ -127,7 +114,6 @@ return function()
                                         return
                                     end
                                 end
-                                
                                 for _, pattern in ipairs(suspiciousPatterns) do
                                     if remoteName:find(pattern, 1, true) then
                                         if method == "InvokeServer" then
@@ -136,7 +122,6 @@ return function()
                                         return
                                     end
                                 end
-                                
                                 if #args >= 4 then
                                     local success3, isExternal = pcall(checkcaller)
                                     if success3 and isExternal then
@@ -144,7 +129,6 @@ return function()
                                             args[2] = 0
                                             args[3] = 0
                                         end
-                                        
                                         if remoteName:find("stamina") then
                                             if #args >= 1 then
                                                 args[1] = math.max(0, math.min(100, args[1] or 100))
@@ -154,15 +138,12 @@ return function()
                                 end
                             end
                         end
-                        
                         return originalNamecall(self, table.unpack(args))
                     end)
-                    
                     setreadonly(mt, true)
                 end
             end)
         end
-        
         if not getgenv().playerKickHooked then
             getgenv().playerKickHooked = true
             pcall(function()
@@ -174,7 +155,6 @@ return function()
                         end)
                     end
                 end
-                
                 local playerMeta = getrawmetatable(player)
                 if playerMeta then
                     setreadonly(playerMeta, false)
@@ -187,7 +167,6 @@ return function()
                     end)
                     setreadonly(playerMeta, true)
                 end
-                
                 local playersService = game:GetService("Players")
                 local originalKick = playersService.Kick
                 if originalKick then
@@ -248,20 +227,16 @@ return function()
             local lastGCCall = 0
             local callCount = 0
             local maxCallsPerSecond = 5
-            
             getgc = function(...)
                 local now = tick()
                 callCount = callCount + 1
-                
                 if now - lastGCCall >= 1 then
                     callCount = 0
                     lastGCCall = now
                 end
-                
                 if callCount > maxCallsPerSecond then
                     task.wait(math.random(50, 150) / 1000)
                 end
-                
                 lastGCCall = tick()
                 return realGetGC(...)
             end
@@ -293,10 +268,8 @@ return function()
         getgenv().callStackSpoofed = true
         pcall(function()
             local originalGetCallingScript = getcallingscript
-            
             getcallingscript = function()
                 local calling = originalGetCallingScript()
-                
                 if calling == nil then
                     local success, result = pcall(function()
                         return game:GetService("StarterPlayer").StarterPlayerScripts
@@ -305,7 +278,6 @@ return function()
                         return result
                     end
                 end
-                
                 return calling
             end
         end)
@@ -315,26 +287,21 @@ return function()
         getgenv().detectedHookAttempted = true
         task.spawn(function()
             task.wait(5)
-            
             local function safeGetGC()
                 local success, result = pcall(function()
                     return getgc(true)
                 end)
                 return success and result or {}
             end
-            
             local objects = safeGetGC()
             local checked = 0
             local maxCheck = 80
-            
             for _, v in next, objects do
                 checked = checked + 1
                 if checked > maxCheck then break end
-                
                 if typeof(v) == "table" then
                     local detected = rawget(v, "Detected")
                     local rlocked = rawget(v, "RLocked")
-                    
                     if detected and typeof(detected) == "function" and rlocked then
                         pcall(function()
                             local oldDetected = detected
@@ -348,7 +315,6 @@ return function()
                         break
                     end
                 end
-                
                 if checked % 10 == 0 then
                     task.wait(0.01)
                 end
@@ -362,19 +328,16 @@ return function()
         loaded = true,
         bypassActive = bypassLoaded,
         metaProtected = metaProtected,
-        
         safeGetGC = function()
             task.wait(math.random(100, 500) / 1000)
             return getgc(true)
         end,
-        
         safeFireServer = function(remote, ...)
             if math.random(1, 3) == 1 then
                 task.wait(math.random(10, 50) / 1000)
             end
             return remote:FireServer(...)
         end,
-        
         safeConnect = function(signal, func)
             local connection
             task.spawn(function()
@@ -384,7 +347,6 @@ return function()
             end)
             return connection
         end,
-        
         isSafe = function()
             return bypassLoaded or (metaProtected and CONFIG.BLOCK_REMOTES)
         end,
