@@ -43,7 +43,7 @@ local function SaveSettings()
         if not writefile then return end
         local data = {
             toggles = AppleHub.Toggles,
-            theme = AppleHub.CurrentTheme or "Silver",
+            theme = AppleHub.CurrentTheme or "Dark",
         }
         writefile(AppleHub.SettingsFile, game:GetService("HttpService"):JSONEncode(data))
     end)
@@ -78,7 +78,7 @@ local Window = WindUI:CreateWindow({
     MinSize = Vector2.new(560, 350),
     MaxSize = Vector2.new(850, 560),
     Transparent = true,
-    Theme = AppleHub.CurrentTheme or "Silver",
+    Theme = AppleHub.CurrentTheme or "Dark",
     Resizable = true,
     SideBarWidth = 200,
     HideSearchBar = true,
