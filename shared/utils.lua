@@ -30,6 +30,11 @@ function LinuxHub.PlayerHasTool(player, toolName)
     return false
 end
 
+function LinuxHub.IsInnocent(player)
+    if not player then return false end
+    return not LinuxHub.PlayerHasTool(player, "Knife") and not LinuxHub.PlayerHasTool(player, "Gun")
+end
+
 function LinuxHub.GetPlatform()
     if _G.ExecutorFunctionality and _G.ExecutorFunctionality.IsMobile then
         if _G.ExecutorFunctionality.IsMobile() then

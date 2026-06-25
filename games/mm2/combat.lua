@@ -464,12 +464,8 @@ CombatTab:Button({
             WindUI:Notify({ Title = "TP to Gun", Content = "You are dead or round inactive", Duration = 2 })
             return
         end
-        if utils.PlayerHasTool(localPlayer, "Knife") then
-            WindUI:Notify({ Title = "TP to Gun", Content = "You are the murderer! Cannot teleport to GunDrop.", Duration = 2 })
-            return
-        end
-        if utils.PlayerHasTool(localPlayer, "Gun") then
-            WindUI:Notify({ Title = "TP to Gun", Content = "You already have a gun or are not innocent.", Duration = 2 })
+        if not utils.IsInnocent(localPlayer) then
+            WindUI:Notify({ Title = "TP to Gun", Content = "You are not innocent. Cannot teleport to GunDrop.", Duration = 2 })
             return
         end
         local gunDrop = GetClosestGunDrop()
@@ -516,8 +512,7 @@ local function TryTeleportToGun()
     if not IsPlayerAlive() or not IsRoundActive() then return end
     local localPlayer = game.Players.LocalPlayer
     if not localPlayer then return end
-    if utils.PlayerHasTool(localPlayer, "Knife") then return end
-    if utils.PlayerHasTool(localPlayer, "Gun") then return end
+    if not utils.IsInnocent(localPlayer) then return end
     local gd = GetClosestGunDrop()
     if gd then
         TeleportToGunDrop(gd)
