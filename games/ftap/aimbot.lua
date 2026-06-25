@@ -5,7 +5,7 @@ local config = AppleHub.Config
 local CombatTab = AppleHub.Window:Tab({ Title = "Combat" })
 
 local Config = {
-    Enabled = false,
+    Enabled = AppleHub.Toggles.silentAimEnabled or false,
     Distance = 30,
     TargetMode = "cursor",
 }
@@ -91,9 +91,10 @@ RunService.RenderStepped:Connect(updateTarget)
 
 CombatTab:Toggle({
     Title = "Silent Aim",
-    Value = false,
+    Value = Config.Enabled,
     Callback = function(state)
         Config.Enabled = state
+        AppleHub.Toggles.silentAimEnabled = state
         WindUI:Notify({
             Title = "Silent Aim",
             Content = Config.Enabled and "Enabled" or "Disabled",
