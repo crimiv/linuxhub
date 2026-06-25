@@ -34,6 +34,7 @@ AppleHub = AppleHub or {}
 AppleHub.WindUI = WindUI
 AppleHub.Utils = utils
 AppleHub.Config = config
+AppleHub.Toggles = AppleHub.Toggles or {}
 
 local version = APPLE_HUB_VERSION or "1.0.0"
 
@@ -69,11 +70,20 @@ task.spawn(function()
         if remoteVersion and remoteVersion ~= version then
             WindUI:Notify({
                 Title = "Update Available",
-                Content = "New version " .. remoteVersion .. " is available. Please reload the hub.",
-                Duration = 5,
+                Content = "New version " .. remoteVersion .. " is available. Reloading...",
+                Duration = 3,
             })
+            task.wait(1)
+            loadstring(game:HttpGet(BASE_URL .. "main.lua"))()
         end
     end
 end)
 
 LoadScript("games/universal/admin.lua")
+
+if _G.APPLE_HUB_STATES then
+    for key, value in pairs(_G.APPLE_HUB_STATES) do
+        AppleHub.Toggles[key] = value
+    end
+    _G.APPLE_HUB_STATES = nil
+end
