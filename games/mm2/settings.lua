@@ -16,36 +16,3 @@ SettingsTab:Dropdown({
         WindUI:Notify({ Title = "Theme", Content = "Switched to " .. value, Duration = 2 })
     end
 })
-
-SettingsTab:Button({
-    Title = "Check for Updates",
-    Callback = function()
-        local BASE_URL = "https://raw.githubusercontent.com/crimiv/applehub/main/"
-        local success, remoteVersion = pcall(function()
-            return game:HttpGet(BASE_URL .. "version.txt")
-        end)
-        if success then
-            remoteVersion = remoteVersion:gsub("%s+", "")
-            local currentVersion = APPLE_HUB_VERSION or "1.0.0"
-            if remoteVersion and remoteVersion ~= currentVersion then
-                WindUI:Notify({
-                    Title = "Update Available",
-                    Content = "New version " .. remoteVersion .. " is available. Please reload the hub.",
-                    Duration = 5,
-                })
-            else
-                WindUI:Notify({
-                    Title = "No Updates",
-                    Content = "You are on the latest version.",
-                    Duration = 3,
-                })
-            end
-        else
-            WindUI:Notify({
-                Title = "Error",
-                Content = "Failed to check for updates.",
-                Duration = 3,
-            })
-        end
-    end
-})
