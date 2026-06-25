@@ -35,7 +35,7 @@ AppleHub.WindUI = WindUI
 AppleHub.Utils = utils
 AppleHub.Config = config
 
-local version = config.version or "1.0.0"
+local version = APPLE_HUB_VERSION or "1.0.0"
 
 local Window = WindUI:CreateWindow({
     Title = "Apple Hub v" .. version,
@@ -61,20 +61,17 @@ local Window = WindUI:CreateWindow({
 AppleHub.Window = Window
 
 task.spawn(function()
-    local success, remoteConfig = pcall(function()
-        return game:HttpGet(BASE_URL .. "shared/config.lua")
+    local success, remoteVersion = pcall(function()
+        return game:HttpGet(BASE_URL .. "version.txt")
     end)
     if success then
-        local fn, err = loadstring(remoteConfig)
-        if fn then
-            local remote = fn()
-            if remote and remote.version and remote.version ~= version then
-                WindUI:Notify({
-                    Title = "Update Available",
-                    Content = "New version " .. remote.version .. " is available. Please reload the hub.",
-                    Duration = 5,
-                })
-            end
+        remoteVersion = remoteVersion:gsub("%s+", "")
+        if remoteVersion and remoteVersion ~= version then
+            WindUI:Notify({
+                Title = "Update Available",
+                Content = "New version " .. remoteVersion .. " is available. Please reload the hub.",
+                Duration = 5,
+            })
         end
     end
 end)
