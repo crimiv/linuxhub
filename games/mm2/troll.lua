@@ -89,16 +89,17 @@ TrollTab:Button({
     end
 })
 
-local autoFlingMurdererEnabled = false
-local autoFlingSheriffEnabled = false
+local autoFlingMurdererEnabled = AppleHub.Toggles.autoFlingMurdererEnabled or false
+local autoFlingSheriffEnabled = AppleHub.Toggles.autoFlingSheriffEnabled or false
 local autoFlingMurdererCoroutine = nil
 local autoFlingSheriffCoroutine = nil
 
 TrollTab:Toggle({
     Title = "Auto Fling Murderer",
-    Value = false,
+    Value = autoFlingMurdererEnabled,
     Callback = function(state)
         autoFlingMurdererEnabled = state
+        AppleHub.Toggles.autoFlingMurdererEnabled = state
         WindUI:Notify({
             Title = "Auto Fling Murderer",
             Content = autoFlingMurdererEnabled and "Enabled" or "Disabled",
@@ -134,9 +135,10 @@ TrollTab:Toggle({
 
 TrollTab:Toggle({
     Title = "Auto Fling Sheriff",
-    Value = false,
+    Value = autoFlingSheriffEnabled,
     Callback = function(state)
         autoFlingSheriffEnabled = state
+        AppleHub.Toggles.autoFlingSheriffEnabled = state
         WindUI:Notify({
             Title = "Auto Fling Sheriff",
             Content = autoFlingSheriffEnabled and "Enabled" or "Disabled",
@@ -240,14 +242,15 @@ TrollTab:Button({
     end
 })
 
-local loopFlingSelectedEnabled = false
+local loopFlingSelectedEnabled = AppleHub.Toggles.loopFlingSelectedEnabled or false
 local loopFlingSelectedCoroutine = nil
 
 TrollTab:Toggle({
     Title = "Loop Fling Selected Player",
-    Value = false,
+    Value = loopFlingSelectedEnabled,
     Callback = function(state)
         loopFlingSelectedEnabled = state
+        AppleHub.Toggles.loopFlingSelectedEnabled = state
         WindUI:Notify({
             Title = "Loop Fling Selected Player",
             Content = loopFlingSelectedEnabled and "Enabled" or "Disabled",
