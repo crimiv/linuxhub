@@ -210,10 +210,10 @@ return function()
 
     if CONFIG.FAKE_LAG then
         task.spawn(function()
-            while task.wait(1) do
+            while task.wait(0.1) do
                 pcall(function()
-                    if math.random(1, 30) == 1 then
-                        task.wait(5 / 1000)
+                    if math.random(1, 50) == 1 then
+                        task.wait(math.random(5, 20) / 1000)
                     end
                 end)
             end
