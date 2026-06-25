@@ -334,15 +334,35 @@ CombatTab:Toggle({
     end
 })
 
-local function GetAllGunDrops()
-    local gunDrops = {}
+-- Gun drop caching system
+local gunDropCache = {}
+local function RefreshGunDropCache()
+    gunDropCache = {}
     for _, obj in ipairs(workspace:GetDescendants()) do
         if obj.Name == "GunDrop" then
-            table.insert(gunDrops, obj)
+            table.insert(gunDropCache, obj)
         end
     end
-    return gunDrops
 end
+
+RefreshGunDropCache()
+
+workspace.ChildAdded:Connect(function(child)
+    if child.Name == "GunDrop" then
+        table.insert(gunDropCache, child)
+    end
+end)
+
+workspace.ChildRemoved:Connect(function(child)
+    if child.Name == "GunDrop" then
+        for i, gd in ipairs(gunDropCache) do
+            if gd == child then
+                table.remove(gunDropCache, i)
+                break
+            end
+        end
+    end
+end)
 
 local function GetClosestGunDrop()
     local localPlayer = game.Players.LocalPlayer
@@ -352,10 +372,9 @@ local function GetClosestGunDrop()
     local rootPart = character:FindFirstChild("HumanoidRootPart")
     if not rootPart then return nil end
     local pos = rootPart.Position
-    local gunDrops = GetAllGunDrops()
     local closest = nil
     local closestDist = math.huge
-    for _, gd in ipairs(gunDrops) do
+    for _, gd in ipairs(gunDropCache) do
         local gdPos
         if gd:IsA("BasePart") then
             gdPos = gd.Position
@@ -480,16 +499,15 @@ CombatTab:Button({
 
 local autoGunTPEnabled = AppleHub.Toggles.autoGunTPEnabled or false
 local gunTPTimer = nil
-local gunTPLastCheck = 0
-local currentSheriff = nil
-local mapChildAddedConnection = nil
-local sheriffCharacterRemovedConnection = nil
-local sheriffPlayerRemovingConnection = nil
+local gunTPCoroutine = nil
 
 local function CleanupAutoGunTP()
     if gunTPTimer then
         gunTPTimer:Disconnect()
         gunTPTimer = nil
+    end
+    if gunTPCoroutine then
+        gunTPCoroutine = nil
     end
     if mapChildAddedConnection then
         mapChildAddedConnection:Disconnect()
@@ -519,24 +537,27 @@ local function TryTeleportToGun()
     end
 end
 
+local function AutoGunTPLoop()
+    while autoGunTPEnabled do
+        if not _G.APPLE_HUB_UPDATING then
+            TryTeleportToGun()
+        end
+        task.wait(1)
+    end
+end
+
 local function SetupAutoGunTP()
     CleanupAutoGunTP()
     if not autoGunTPEnabled then return end
     TryTeleportToGun()
-    gunTPLastCheck = 0
-    gunTPTimer = game:GetService("RunService").Stepped:Connect(function()
-        if _G.APPLE_HUB_UPDATING then return end
-        if not autoGunTPEnabled then return end
-        local now = tick()
-        if now - gunTPLastCheck < 0.5 then return end
-        gunTPLastCheck = now
-        TryTeleportToGun()
-    end)
+    gunTPCoroutine = coroutine.create(AutoGunTPLoop)
+    coroutine.resume(gunTPCoroutine)
     local map = currentMap and workspace:FindFirstChild(currentMap)
     if map then
         mapChildAddedConnection = map.ChildAdded:Connect(function(child)
             if _G.APPLE_HUB_UPDATING then return end
             if child.Name == "GunDrop" then
+                RefreshGunDropCache()
                 TryTeleportToGun()
             end
         end)
