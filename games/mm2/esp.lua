@@ -135,7 +135,7 @@ VisualTab:Toggle({
         AppleHub.Toggles.espEnabled = state
         if AppleHub.SaveSettings then AppleHub.SaveSettings() end
         WindUI:Notify({
-            Title = "ESP",
+            Title = "ESP Highlight",
             Content = espEnabled and "ESP Enabled" or "ESP Disabled",
             Duration = 2,
         })
