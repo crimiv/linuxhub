@@ -211,11 +211,111 @@ MiscTab:Toggle({
     end
 })
 
+local walkFlingEnabled = AppleHub.Toggles.walkFlingEnabled or false
+local walkFlingSpeed = AppleHub.Toggles.walkFlingSpeed or 500
+local defaultWalkSpeed = 16
+local walkFlingConnections = {}
+
+local function CleanupWalkFling()
+    for _, conn in ipairs(walkFlingConnections) do
+        pcall(function() conn:Disconnect() end)
+    end
+    walkFlingConnections = {}
+    local localPlayer = game.Players.LocalPlayer
+    if localPlayer and localPlayer.Character then
+        local humanoid = localPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = defaultWalkSpeed
+        end
+    end
+end
+
+local function SetupWalkFling()
+    CleanupWalkFling()
+    if not walkFlingEnabled then return end
+
+    local localPlayer = game.Players.LocalPlayer
+    if not localPlayer then return end
+
+    local function ApplySpeed()
+        local char = localPlayer.Character
+        if char then
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = walkFlingSpeed
+            end
+        end
+    end
+
+    local function OnCharacterAdded(char)
+        task.wait(0.1)
+        ApplySpeed()
+    end
+
+    if localPlayer.Character then
+        ApplySpeed()
+    end
+
+    local conn1 = localPlayer.CharacterAdded:Connect(OnCharacterAdded)
+    table.insert(walkFlingConnections, conn1)
+
+    local conn2 = game:GetService("RunService").Heartbeat:Connect(function()
+        if _G.APPLE_HUB_UPDATING then return end
+        if not walkFlingEnabled then return end
+        pcall(ApplySpeed)
+    end)
+    table.insert(walkFlingConnections, conn2)
+end
+
+local function ToggleWalkFling(state)
+    walkFlingEnabled = state
+    AppleHub.Toggles.walkFlingEnabled = state
+    if AppleHub.SaveSettings then AppleHub.SaveSettings() end
+    if state then
+        SetupWalkFling()
+        WindUI:Notify({ Title = "WalkFling", Content = "Enabled (" .. walkFlingSpeed .. " speed)", Duration = 2 })
+    else
+        CleanupWalkFling()
+        WindUI:Notify({ Title = "WalkFling", Content = "Disabled", Duration = 2 })
+    end
+end
+
+MiscTab:Toggle({
+    Title = "WalkFling",
+    Value = walkFlingEnabled,
+    Callback = function(state)
+        ToggleWalkFling(state)
+    end
+})
+
+MiscTab:Slider({
+    Title = "WalkFling Speed",
+    Desc = "WalkSpeed when WalkFling is enabled",
+    Min = 100,
+    Max = 1000,
+    Default = walkFlingSpeed,
+    Callback = function(value)
+        walkFlingSpeed = value
+        AppleHub.Toggles.walkFlingSpeed = value
+        if AppleHub.SaveSettings then AppleHub.SaveSettings() end
+        if walkFlingEnabled then
+            SetupWalkFling()
+            WindUI:Notify({ Title = "WalkFling", Content = "Speed set to " .. value, Duration = 2 })
+        end
+    end
+})
+
 AppleHub.DisableAll = function()
     if antiFlingEnabled then
         antiFlingEnabled = false
         AppleHub.Toggles.antiFlingEnabled = false
         if AppleHub.SaveSettings then AppleHub.SaveSettings() end
         CleanupAntiFling()
+    end
+    if walkFlingEnabled then
+        walkFlingEnabled = false
+        AppleHub.Toggles.walkFlingEnabled = false
+        if AppleHub.SaveSettings then AppleHub.SaveSettings() end
+        CleanupWalkFling()
     end
 end
