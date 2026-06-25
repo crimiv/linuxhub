@@ -26,13 +26,21 @@ local function GetPlayerRoleColor(player)
     end
 end
 
-local function UpdateESP()
+local function ClearESP()
     for _, highlight in pairs(highlightInstances) do
         if highlight and highlight.Parent then
             highlight:Destroy()
         end
     end
     highlightInstances = {}
+end
+
+local function UpdateESP()
+    if _G.APPLE_HUB_UPDATING then
+        ClearESP()
+        return
+    end
+    ClearESP()
     if not espEnabled then return end
     local localPlayer = game.Players.LocalPlayer
     if not localPlayer then return end
@@ -95,6 +103,7 @@ local setSheriffRemote = extras and extras:FindFirstChild("SetSheriff")
 
 if setMurdererRemote and setMurdererRemote:IsA("RemoteEvent") then
     setMurdererRemote.OnClientEvent:Connect(function(...)
+        if _G.APPLE_HUB_UPDATING then return end
         local player = utils.GetPlayerFromArg(...)
         if player then
             playerRoles[player] = "murderer"
@@ -105,6 +114,7 @@ end
 
 if setSheriffRemote and setSheriffRemote:IsA("RemoteEvent") then
     setSheriffRemote.OnClientEvent:Connect(function(...)
+        if _G.APPLE_HUB_UPDATING then return end
         local player = utils.GetPlayerFromArg(...)
         if player then
             playerRoles[player] = "sheriff"
@@ -116,6 +126,7 @@ end
 local roundTimer = workspace:FindFirstChild("RoundTimerPart")
 if roundTimer then
     roundTimer:GetAttributeChangedSignal("Time"):Connect(function()
+        if _G.APPLE_HUB_UPDATING then return end
         local time = roundTimer:GetAttribute("Time") or -1
         if time <= 0 then
             for player, _ in pairs(playerRoles) do
@@ -130,6 +141,7 @@ AssignFallbackRoles()
 if espEnabled then UpdateESP() end
 
 game.Players.PlayerAdded:Connect(function(player)
+    if _G.APPLE_HUB_UPDATING then return end
     if not playerRoles[player] then
         if utils.PlayerHasTool(player, "Knife") then
             playerRoles[player] = "murderer"
@@ -140,6 +152,7 @@ game.Players.PlayerAdded:Connect(function(player)
         end
     end
     player.CharacterAdded:Connect(function()
+        if _G.APPLE_HUB_UPDATING then return end
         task.wait(0.5)
         if not playerRoles[player] then
             if utils.PlayerHasTool(player, "Knife") then
@@ -155,6 +168,7 @@ game.Players.PlayerAdded:Connect(function(player)
 end)
 
 game.Players.PlayerRemoving:Connect(function(player)
+    if _G.APPLE_HUB_UPDATING then return end
     if highlightInstances[player] then
         highlightInstances[player]:Destroy()
         highlightInstances[player] = nil
@@ -163,6 +177,7 @@ game.Players.PlayerRemoving:Connect(function(player)
 end)
 
 game:GetService("RunService").Heartbeat:Connect(function()
+    if _G.APPLE_HUB_UPDATING then return end
     if espEnabled then
         for _, player in pairs(game.Players:GetPlayers()) do
             if not playerRoles[player] then
@@ -191,12 +206,7 @@ VisualTab:Toggle({
             Duration = 2,
         })
         if not espEnabled then
-            for _, highlight in pairs(highlightInstances) do
-                if highlight and highlight.Parent then
-                    highlight:Destroy()
-                end
-            end
-            highlightInstances = {}
+            ClearESP()
         else
             UpdateESP()
         end
@@ -206,3 +216,9 @@ VisualTab:Toggle({
 AppleHub.GetCurrentMurderer = GetCurrentMurderer
 AppleHub.GetCurrentSheriff = GetCurrentSheriff
 AppleHub.playerRoles = playerRoles
+
+AppleHub.DisableAll = function()
+    espEnabled = false
+    AppleHub.Toggles.espEnabled = false
+    ClearESP()
+end
