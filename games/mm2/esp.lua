@@ -1,8 +1,8 @@
-local WindUI = SilverHub.WindUI
-local utils = SilverHub.Utils
-local config = SilverHub.Config
+local WindUI = AppleHub.WindUI
+local utils = AppleHub.Utils
+local config = AppleHub.Config
 
-local VisualTab = SilverHub.Window:Tab({ Title = "Visual" })
+local VisualTab = AppleHub.Window:Tab({ Title = "Visual" })
 
 local espEnabled = false
 local highlightInstances = {}
@@ -184,6 +184,11 @@ VisualTab:Toggle({
     Value = false,
     Callback = function(state)
         espEnabled = state
+        WindUI:Notify({
+            Title = "ESP",
+            Content = espEnabled and "ESP Enabled" or "ESP Disabled",
+            Duration = 2,
+        })
         if not espEnabled then
             for _, highlight in pairs(highlightInstances) do
                 if highlight and highlight.Parent then
@@ -197,6 +202,6 @@ VisualTab:Toggle({
     end
 })
 
-SilverHub.GetCurrentMurderer = GetCurrentMurderer
-SilverHub.GetCurrentSheriff = GetCurrentSheriff
-SilverHub.playerRoles = playerRoles
+AppleHub.GetCurrentMurderer = GetCurrentMurderer
+AppleHub.GetCurrentSheriff = GetCurrentSheriff
+AppleHub.playerRoles = playerRoles
