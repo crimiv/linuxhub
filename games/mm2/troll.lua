@@ -11,6 +11,7 @@ local function IsSeated(player)
 end
 
 local function FlingPlayer(target, silent)
+    if _G.APPLE_HUB_UPDATING then return false end
     if not target or target == game.Players.LocalPlayer then
         if not silent then WindUI:Notify({ Title = "Fling", Content = "Invalid target", Duration = 2 }) end
         return false
@@ -43,6 +44,7 @@ local function FlingPlayer(target, silent)
     bav.Parent = hrp
     local timeout = tick() + 3
     while tick() < timeout and not launched do
+        if _G.APPLE_HUB_UPDATING then break end
         if not target.Parent or tHum.Health <= 0 then break end
         hrp.CFrame = tHrp.CFrame
         if (tHrp.Position - targetStartPos).Magnitude > 60 or tHrp.Velocity.Magnitude > 180 then
@@ -68,6 +70,7 @@ end
 TrollTab:Button({
     Title = "Fling Murderer",
     Callback = function()
+        if _G.APPLE_HUB_UPDATING then return end
         local murderer = AppleHub.GetCurrentMurderer()
         if murderer then
             FlingPlayer(murderer, false)
@@ -80,6 +83,7 @@ TrollTab:Button({
 TrollTab:Button({
     Title = "Fling Sheriff",
     Callback = function()
+        if _G.APPLE_HUB_UPDATING then return end
         local sheriff = AppleHub.GetCurrentSheriff()
         if sheriff then
             FlingPlayer(sheriff, false)
@@ -111,6 +115,7 @@ TrollTab:Toggle({
             end
             autoFlingMurdererCoroutine = coroutine.create(function()
                 while autoFlingMurdererEnabled do
+                    if _G.APPLE_HUB_UPDATING then break end
                     local target = AppleHub.GetCurrentMurderer()
                     if target then
                         local launched = FlingPlayer(target, true)
@@ -150,6 +155,7 @@ TrollTab:Toggle({
             end
             autoFlingSheriffCoroutine = coroutine.create(function()
                 while autoFlingSheriffEnabled do
+                    if _G.APPLE_HUB_UPDATING then break end
                     local target = AppleHub.GetCurrentSheriff()
                     if target then
                         local launched = FlingPlayer(target, true)
@@ -213,6 +219,7 @@ CreateFlingDropdown()
 TrollTab:Button({
     Title = "Refresh Players",
     Callback = function()
+        if _G.APPLE_HUB_UPDATING then return end
         CreateFlingDropdown()
         WindUI:Notify({ Title = "Fling Player", Content = "Player list refreshed", Duration = 2 })
     end
@@ -221,6 +228,7 @@ TrollTab:Button({
 TrollTab:Button({
     Title = "Fling Selected Player",
     Callback = function()
+        if _G.APPLE_HUB_UPDATING then return end
         if not selectedFlingPlayer or selectedFlingPlayer == "No other players" then
             WindUI:Notify({ Title = "Error", Content = "No valid player selected", Duration = 2 })
             return
@@ -232,6 +240,7 @@ TrollTab:Button({
         end
         task.spawn(function()
             while targetPlayer and targetPlayer.Parent do
+                if _G.APPLE_HUB_UPDATING then break end
                 local launched = FlingPlayer(targetPlayer, true)
                 if launched then
                     break
@@ -262,6 +271,7 @@ TrollTab:Toggle({
             end
             loopFlingSelectedCoroutine = coroutine.create(function()
                 while loopFlingSelectedEnabled do
+                    if _G.APPLE_HUB_UPDATING then break end
                     if selectedFlingPlayer and selectedFlingPlayer ~= "No other players" then
                         local targetPlayer = game.Players:FindFirstChild(selectedFlingPlayer)
                         if targetPlayer then
@@ -290,3 +300,21 @@ TrollTab:Toggle({
 
 game.Players.PlayerAdded:Connect(CreateFlingDropdown)
 game.Players.PlayerRemoving:Connect(CreateFlingDropdown)
+
+AppleHub.DisableAll = function()
+    autoFlingMurdererEnabled = false
+    AppleHub.Toggles.autoFlingMurdererEnabled = false
+    autoFlingSheriffEnabled = false
+    AppleHub.Toggles.autoFlingSheriffEnabled = false
+    loopFlingSelectedEnabled = false
+    AppleHub.Toggles.loopFlingSelectedEnabled = false
+    if autoFlingMurdererCoroutine then
+        autoFlingMurdererCoroutine = nil
+    end
+    if autoFlingSheriffCoroutine then
+        autoFlingSheriffCoroutine = nil
+    end
+    if loopFlingSelectedCoroutine then
+        loopFlingSelectedCoroutine = nil
+    end
+end
