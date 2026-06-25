@@ -27,6 +27,7 @@ local AUTO_SHOOT_COOLDOWN = config.cooldowns.autoShoot
 local lastAutoShootTime = 0
 
 local function ShootAtMurderer(silent)
+    if _G.APPLE_HUB_UPDATING then return end
     local localPlayer = game.Players.LocalPlayer
     if not localPlayer then
         if not silent then WindUI:Notify({ Title = "Error", Content = "Local player not found", Duration = 2 }) end
@@ -106,6 +107,7 @@ local function ShootAtMurderer(silent)
 end
 
 game:GetService("RunService").Heartbeat:Connect(function()
+    if _G.APPLE_HUB_UPDATING then return end
     if autoShootEnabled then
         local now = tick()
         if now - lastAutoShootTime >= AUTO_SHOOT_COOLDOWN then
@@ -142,6 +144,7 @@ CombatTab:Toggle({
 CombatTab:Button({
     Title = "Kill All",
     Callback = function()
+        if _G.APPLE_HUB_UPDATING then return end
         local localPlayer = game.Players.LocalPlayer
         if not localPlayer then
             WindUI:Notify({ Title = "Error", Content = "Local player not found", Duration = 2 })
@@ -197,6 +200,7 @@ local AUTO_KILL_ALL_COOLDOWN = config.cooldowns.autoKillAll
 local lastAutoKillAllTime = 0
 
 local function KillAll()
+    if _G.APPLE_HUB_UPDATING then return end
     local localPlayer = game.Players.LocalPlayer
     if not localPlayer then return end
     local knife = nil
@@ -231,6 +235,7 @@ local function KillAll()
 end
 
 game:GetService("RunService").Heartbeat:Connect(function()
+    if _G.APPLE_HUB_UPDATING then return end
     if autoKillAllEnabled then
         local now = tick()
         if now - lastAutoKillAllTime >= AUTO_KILL_ALL_COOLDOWN then
@@ -310,6 +315,7 @@ end
 local isTeleporting = false
 
 local function TeleportToGunDrop(gunDrop)
+    if _G.APPLE_HUB_UPDATING then return end
     if not gunDrop or isTeleporting then return end
     if not IsPlayerAlive() or not IsRoundActive() then return end
     local localPlayer = game.Players.LocalPlayer
@@ -365,6 +371,7 @@ end
 CombatTab:Button({
     Title = "TP to Gun",
     Callback = function()
+        if _G.APPLE_HUB_UPDATING then return end
         local localPlayer = game.Players.LocalPlayer
         if not localPlayer then
             WindUI:Notify({ Title = "Error", Content = "Local player not found", Duration = 2 })
@@ -416,6 +423,7 @@ local function CleanupAutoGunTP()
 end
 
 local function TryTeleportToGun()
+    if _G.APPLE_HUB_UPDATING then return end
     if not autoGunTPEnabled or isTeleporting then return end
     if not IsPlayerAlive() or not IsRoundActive() then return end
     local localPlayer = game.Players.LocalPlayer
@@ -433,6 +441,7 @@ local function SetupAutoGunTP()
     TryTeleportToGun()
     gunTPLastCheck = 0
     gunTPTimer = game:GetService("RunService").Stepped:Connect(function()
+        if _G.APPLE_HUB_UPDATING then return end
         if not autoGunTPEnabled then return end
         local now = tick()
         if now - gunTPLastCheck < 0.5 then return end
@@ -442,6 +451,7 @@ local function SetupAutoGunTP()
     local map = currentMap and workspace:FindFirstChild(currentMap)
     if map then
         mapChildAddedConnection = map.ChildAdded:Connect(function(child)
+            if _G.APPLE_HUB_UPDATING then return end
             if child.Name == "GunDrop" then
                 TryTeleportToGun()
             end
@@ -456,6 +466,7 @@ local function SetupAutoGunTP()
     end
     if currentSheriff then
         local function onSheriffCharacterRemoved()
+            if _G.APPLE_HUB_UPDATING then return end
             task.wait(0.1)
             TryTeleportToGun()
         end
@@ -463,6 +474,7 @@ local function SetupAutoGunTP()
             sheriffCharacterRemovedConnection = currentSheriff.Character:WaitForChild("Humanoid").Died:Connect(onSheriffCharacterRemoved)
         end
         sheriffPlayerRemovingConnection = currentSheriff.AncestryChanged:Connect(function()
+            if _G.APPLE_HUB_UPDATING then return end
             if not currentSheriff.Parent then
                 task.wait(0.1)
                 TryTeleportToGun()
@@ -489,3 +501,13 @@ CombatTab:Toggle({
         end
     end
 })
+
+AppleHub.DisableAll = function()
+    autoShootEnabled = false
+    AppleHub.Toggles.autoShootEnabled = false
+    autoKillAllEnabled = false
+    AppleHub.Toggles.autoKillAllEnabled = false
+    autoGunTPEnabled = false
+    AppleHub.Toggles.autoGunTPEnabled = false
+    CleanupAutoGunTP()
+end
