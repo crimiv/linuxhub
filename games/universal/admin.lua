@@ -1,6 +1,6 @@
-local WindUI = SilverHub.WindUI
+local WindUI = AppleHub.WindUI
 
-local AdminTab = SilverHub.Window:Tab({ Title = "Admin" })
+local AdminTab = AppleHub.Window:Tab({ Title = "Admin" })
 
 local function LoadAdmin(url)
     local success, result = pcall(function()
