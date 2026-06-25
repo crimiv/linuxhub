@@ -2,7 +2,9 @@ local BASE_URL = "https://raw.githubusercontent.com/crimiv/silverhub/main/"
 
 local function LoadScript(name)
     local script = game:HttpGet(BASE_URL .. name)
-    assert(loadstring(script))()
+    local fn, err = loadstring(script)
+    if not fn then error(err) end
+    return fn()
 end
 
 local WindUI = LoadScript("shared/windui.lua")
