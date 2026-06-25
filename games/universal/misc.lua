@@ -211,111 +211,108 @@ MiscTab:Toggle({
     end
 })
 
-local walkFlingEnabled = AppleHub.Toggles.walkFlingEnabled or false
-local walkFlingSpeed = AppleHub.Toggles.walkFlingSpeed or 500
-local defaultWalkSpeed = 16
-local walkFlingConnections = {}
+local walkflingEnabled = AppleHub.Toggles.walkflingEnabled or false
+local walkflingPower = AppleHub.Toggles.walkflingPower or 500000
+local walkflingCooldown = 0.5
+local walkflingLastFling = {}
+local walkflingConnections = {}
+local walkflingTouchConn = nil
 
-local function CleanupWalkFling()
-    for _, conn in ipairs(walkFlingConnections) do
+local function CleanupWalkfling()
+    if walkflingTouchConn then
+        walkflingTouchConn:Disconnect()
+        walkflingTouchConn = nil
+    end
+    for _, conn in ipairs(walkflingConnections) do
         pcall(function() conn:Disconnect() end)
     end
-    walkFlingConnections = {}
-    local localPlayer = game.Players.LocalPlayer
-    if localPlayer and localPlayer.Character then
-        local humanoid = localPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.WalkSpeed = defaultWalkSpeed
-        end
-    end
+    walkflingConnections = {}
 end
 
-local function SetupWalkFling()
-    CleanupWalkFling()
-    if not walkFlingEnabled then return end
-
+local function SetupWalkfling()
+    CleanupWalkfling()
+    if not walkflingEnabled then return end
     local localPlayer = game.Players.LocalPlayer
     if not localPlayer then return end
+    local character = localPlayer.Character
+    if not character then return end
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if not rootPart then return end
 
-    local function ApplySpeed()
-        local char = localPlayer.Character
-        if char then
-            local humanoid = char:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                humanoid.WalkSpeed = walkFlingSpeed
-            end
+    walkflingTouchConn = rootPart.Touched:Connect(function(hit)
+        if not walkflingEnabled then return end
+        local target = game.Players:GetPlayerFromCharacter(hit.Parent)
+        if not target or target == localPlayer then return end
+        local targetRoot = target.Character and target.Character:FindFirstChild("HumanoidRootPart")
+        if not targetRoot then return end
+        local now = tick()
+        if walkflingLastFling[target] and now - walkflingLastFling[target] < walkflingCooldown then return end
+        walkflingLastFling[target] = now
+        local direction = (targetRoot.Position - rootPart.Position).Unit
+        local velocity = direction * walkflingPower + Vector3.new(0, walkflingPower * 0.5, 0)
+        targetRoot.AssemblyLinearVelocity = velocity
+    end)
+
+    local function OnCharacterAddedForWalkfling(char)
+        task.wait(0.1)
+        if walkflingEnabled then
+            SetupWalkfling()
         end
     end
 
-    local function OnCharacterAdded(char)
-        task.wait(0.1)
-        ApplySpeed()
-    end
-
-    if localPlayer.Character then
-        ApplySpeed()
-    end
-
-    local conn1 = localPlayer.CharacterAdded:Connect(OnCharacterAdded)
-    table.insert(walkFlingConnections, conn1)
-
-    local conn2 = game:GetService("RunService").Heartbeat:Connect(function()
-        if _G.APPLE_HUB_UPDATING then return end
-        if not walkFlingEnabled then return end
-        pcall(ApplySpeed)
-    end)
-    table.insert(walkFlingConnections, conn2)
+    local charAddedConn = localPlayer.CharacterAdded:Connect(OnCharacterAddedForWalkfling)
+    table.insert(walkflingConnections, charAddedConn)
 end
 
-local function ToggleWalkFling(state)
-    walkFlingEnabled = state
-    AppleHub.Toggles.walkFlingEnabled = state
+local function ToggleWalkfling(state)
+    walkflingEnabled = state
+    AppleHub.Toggles.walkflingEnabled = state
     if AppleHub.SaveSettings then AppleHub.SaveSettings() end
     if state then
-        SetupWalkFling()
-        WindUI:Notify({ Title = "WalkFling", Content = "Enabled (" .. walkFlingSpeed .. " speed)", Duration = 2 })
+        SetupWalkfling()
+        WindUI:Notify({ Title = "Walkfling", Content = "Enabled", Duration = 2 })
     else
-        CleanupWalkFling()
-        WindUI:Notify({ Title = "WalkFling", Content = "Disabled", Duration = 2 })
+        CleanupWalkfling()
+        WindUI:Notify({ Title = "Walkfling", Content = "Disabled", Duration = 2 })
     end
 end
 
 MiscTab:Toggle({
-    Title = "WalkFling",
-    Value = walkFlingEnabled,
+    Title = "Walkfling",
+    Value = walkflingEnabled,
     Callback = function(state)
-        ToggleWalkFling(state)
+        ToggleWalkfling(state)
     end
 })
 
 MiscTab:Slider({
-    Title = "WalkFling Speed",
-    Desc = "WalkSpeed when WalkFling is enabled",
-    Min = 100,
-    Max = 1000,
-    Default = walkFlingSpeed,
+    Title = "Walkfling Power",
+    Desc = "Velocity applied to players you touch",
+    Min = 1000,
+    Max = 1000000,
+    Default = walkflingPower,
     Callback = function(value)
-        walkFlingSpeed = value
-        AppleHub.Toggles.walkFlingSpeed = value
+        walkflingPower = value
+        AppleHub.Toggles.walkflingPower = value
         if AppleHub.SaveSettings then AppleHub.SaveSettings() end
-        if walkFlingEnabled then
-            SetupWalkFling()
-            WindUI:Notify({ Title = "WalkFling", Content = "Speed set to " .. value, Duration = 2 })
-        end
     end
 })
 
+local originalDisableAll = AppleHub.DisableAll
 AppleHub.DisableAll = function()
+    if walkflingEnabled then
+        walkflingEnabled = false
+        AppleHub.Toggles.walkflingEnabled = false
+        if AppleHub.SaveSettings then AppleHub.SaveSettings() end
+        CleanupWalkfling()
+    end
     if antiFlingEnabled then
         antiFlingEnabled = false
         AppleHub.Toggles.antiFlingEnabled = false
         if AppleHub.SaveSettings then AppleHub.SaveSettings() end
         CleanupAntiFling()
     end
-    if walkFlingEnabled then
-        walkFlingEnabled = false
-        AppleHub.Toggles.walkFlingEnabled = false
-        if AppleHub.SaveSettings then AppleHub.SaveSettings() end
-        CleanupWalkFling()
+    if originalDisableAll then
+        originalDisableAll()
     end
 end
