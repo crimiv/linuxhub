@@ -12,17 +12,18 @@ local function AntiFlingLoop()
     local localChar = localPlayer.Character
     if not localChar then return end
 
-    for _, part in ipairs(workspace:GetDescendants()) do
-        if part:IsA("BasePart") and part.Name == "HumanoidRootPart" then
-            local owner = game.Players:GetPlayerFromCharacter(part.Parent)
-            if owner and owner ~= localPlayer then
-                pcall(function()
-                    part.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0, 0, 0)
-                    part.Velocity = Vector3.new(0, 0, 0)
-                    part.RotVelocity = Vector3.new(0, 0, 0)
-                    part.CanCollide = false
-                end)
-            end
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        if player == localPlayer then continue end
+        local char = player.Character
+        if not char then continue end
+        local root = char:FindFirstChild("HumanoidRootPart")
+        if root then
+            pcall(function()
+                root.CustomPhysicalProperties = PhysicalProperties.new(0.0001, 0, 0, 0, 0)
+                root.Velocity = Vector3.new(0, 0, 0)
+                root.RotVelocity = Vector3.new(0, 0, 0)
+                root.CanCollide = false
+            end)
         end
     end
 
