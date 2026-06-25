@@ -2,10 +2,10 @@
 
 local HttpService = game:GetService("HttpService")
 
-local BASE_URL = "https://raw.githubusercontent.com/crimiv/silverhub/main/"
+local Base_Url = "https://raw.githubusercontent.com/crimiv/silverhub/main/"
 
 local success, games = pcall(function()
-    return loadstring(game:HttpGet(BASE_URL .. "GameList.lua"))()
+    return loadstring(game:HttpGet(Base_Url .. "gamelist.lua"))()
 end)
 
 if not success or type(games) ~= "table" then
@@ -17,4 +17,4 @@ if not scriptPath then
     return
 end
 
-loadstring(game:HttpGet(BASE_URL .. HttpService:UrlEncode(scriptPath)))()
+loadstring(game:HttpGet(Base_Url .. HttpService:UrlEncode(scriptPath)))()
