@@ -9,11 +9,20 @@ local function LoadScript(name)
     assert(loadstring(script))()
 end
 
-local bypassScript = Fetch(BASE_URL .. "shared/adonisbypass.lua")
+local bypassScript = Fetch(BASE_URL .. "shared/adonis_bypass.lua")
 local bypassFn = loadstring(bypassScript)
 if bypassFn then
     bypassFn()
 end
+
+local version = Fetch(BASE_URL .. "version.txt")
+if version then
+    version = version:gsub("%s+", "")
+else
+    version = "1.0.0"
+end
+
+APPLE_HUB_VERSION = version
 
 local gamesList = Fetch(BASE_URL .. "games.lua")
 local games = assert(loadstring(gamesList))()
