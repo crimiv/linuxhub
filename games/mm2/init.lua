@@ -7,17 +7,6 @@ local function LoadScript(name)
     return fn()
 end
 
-local WindUI = LoadScript("shared/windui.lua")
-local utils = LoadScript("shared/utils.lua")
-local config = LoadScript("shared/config.lua")
-
-SilverHub = SilverHub or {}
-SilverHub.WindUI = WindUI
-SilverHub.Utils = utils
-SilverHub.Config = config
-
-local version = config.version or "1.0.0"
-
 local function CheckExecutor()
     local missing = {}
     if not game then table.insert(missing, "game") end
@@ -25,9 +14,9 @@ local function CheckExecutor()
     if not task then table.insert(missing, "task") end
     if not pcall then table.insert(missing, "pcall") end
     if #missing > 0 then
-        WindUI:Notify({
+        game:GetService("StarterGui"):SetCore("SendNotification", {
             Title = "Executor Incompatible",
-            Content = "Missing essential functions: " .. table.concat(missing, ", ") .. ". Hub will not load.",
+            Text = "Missing essential functions: " .. table.concat(missing, ", "),
             Duration = 5,
         })
         return false
@@ -38,6 +27,17 @@ end
 if not CheckExecutor() then
     return
 end
+
+local WindUI = LoadScript("shared/windui.lua")
+local utils = LoadScript("shared/utils.lua")
+local config = LoadScript("shared/config.lua")
+
+SilverHub = SilverHub or {}
+SilverHub.WindUI = WindUI
+SilverHub.Utils = utils
+SilverHub.Config = config
+
+local version = config.version or "1.0.0"
 
 local Window = WindUI:CreateWindow({
     Title = "Apple Hub v" .. version,
