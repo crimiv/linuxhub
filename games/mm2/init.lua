@@ -18,6 +18,27 @@ SilverHub.Config = config
 
 local version = config.version or "1.0.0"
 
+local function CheckExecutor()
+    local missing = {}
+    if not game then table.insert(missing, "game") end
+    if not Instance then table.insert(missing, "Instance") end
+    if not task then table.insert(missing, "task") end
+    if not pcall then table.insert(missing, "pcall") end
+    if #missing > 0 then
+        WindUI:Notify({
+            Title = "Executor Incompatible",
+            Content = "Missing essential functions: " .. table.concat(missing, ", ") .. ". MM2 features will not work.",
+            Duration = 5,
+        })
+        return false
+    end
+    return true
+end
+
+if not CheckExecutor() then
+    return
+end
+
 local Window = WindUI:CreateWindow({
     Title = "Apple Hub v" .. version,
     Author = "by coolio",
