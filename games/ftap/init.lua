@@ -7,26 +7,15 @@ local function LoadScript(name)
     return fn()
 end
 
-local WindUI = LoadScript("shared/windui.lua")
-local utils = LoadScript("shared/utils.lua")
-local config = LoadScript("shared/config.lua")
-
-SilverHub = SilverHub or {}
-SilverHub.WindUI = WindUI
-SilverHub.Utils = utils
-SilverHub.Config = config
-
-local version = config.version or "1.0.0"
-
 local function CheckExecutor()
     local missing = {}
     if not hookmetamethod then table.insert(missing, "hookmetamethod") end
     if not getnamecallmethod then table.insert(missing, "getnamecallmethod") end
     if not newcclosure then table.insert(missing, "newcclosure") end
     if #missing > 0 then
-        WindUI:Notify({
+        game:GetService("StarterGui"):SetCore("SendNotification", {
             Title = "Executor Incompatible",
-            Content = "Missing functions: " .. table.concat(missing, ", ") .. ". Hub will not load.",
+            Text = "Missing functions: " .. table.concat(missing, ", ") .. ". Silent Aim will not work.",
             Duration = 5,
         })
         return false
@@ -37,6 +26,17 @@ end
 if not CheckExecutor() then
     return
 end
+
+local WindUI = LoadScript("shared/windui.lua")
+local utils = LoadScript("shared/utils.lua")
+local config = LoadScript("shared/config.lua")
+
+SilverHub = SilverHub or {}
+SilverHub.WindUI = WindUI
+SilverHub.Utils = utils
+SilverHub.Config = config
+
+local version = config.version or "1.0.0"
 
 local Window = WindUI:CreateWindow({
     Title = "Apple Hub v" .. version,
