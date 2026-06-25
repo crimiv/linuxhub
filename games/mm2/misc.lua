@@ -91,5 +91,40 @@ MiscTab:Button({
     end
 })
 
+local function SendChatMessage(message)
+    local SayMessageRequest = game:GetService("ReplicatedStorage"):FindFirstChild("DefaultChatSystemChatEvents") and game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
+    if SayMessageRequest and SayMessageRequest:IsA("RemoteEvent") then
+        SayMessageRequest:FireServer(message, "All")
+    else
+        WindUI:Notify({ Title = "Error", Content = "Chat remote not found", Duration = 2 })
+    end
+end
+
+MiscTab:Button({
+    Title = "Expose Murderer",
+    Callback = function()
+        local murderer = AppleHub.GetCurrentMurderer()
+        if murderer then
+            SendChatMessage("Murderer is " .. murderer.Name)
+            WindUI:Notify({ Title = "Expose", Content = "Murderer exposed in chat", Duration = 2 })
+        else
+            WindUI:Notify({ Title = "Expose", Content = "No murderer found", Duration = 2 })
+        end
+    end
+})
+
+MiscTab:Button({
+    Title = "Expose Sheriff",
+    Callback = function()
+        local sheriff = AppleHub.GetCurrentSheriff()
+        if sheriff then
+            SendChatMessage("Sheriff is " .. sheriff.Name)
+            WindUI:Notify({ Title = "Expose", Content = "Sheriff exposed in chat", Duration = 2 })
+        else
+            WindUI:Notify({ Title = "Expose", Content = "No sheriff found", Duration = 2 })
+        end
+    end
+})
+
 game.Players.PlayerAdded:Connect(CreatePlayerDropdown)
 game.Players.PlayerRemoving:Connect(CreatePlayerDropdown)
