@@ -35,6 +35,13 @@ AppleHub.Utils = utils
 AppleHub.Config = config
 AppleHub.Toggles = AppleHub.Toggles or {}
 
+if _G.APPLE_HUB_STATES then
+    for key, value in pairs(_G.APPLE_HUB_STATES) do
+        AppleHub.Toggles[key] = value
+    end
+    _G.APPLE_HUB_STATES = nil
+end
+
 local version = APPLE_HUB_VERSION or "1.0.0"
 
 local Window = WindUI:CreateWindow({
@@ -79,10 +86,3 @@ task.spawn(function()
 end)
 
 LoadScript("games/ftap/aimbot.lua")
-
-if _G.APPLE_HUB_STATES then
-    for key, value in pairs(_G.APPLE_HUB_STATES) do
-        AppleHub.Toggles[key] = value
-    end
-    _G.APPLE_HUB_STATES = nil
-end
