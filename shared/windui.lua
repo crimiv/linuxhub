@@ -9,6 +9,8 @@ local WindUI = (function()
         :gsub('"ImageLabel"%s*,', '"Frame",')
         :gsub('%.Image%s*=', '.BackgroundImage =')
         :gsub('Image%s*=', 'BackgroundImage =')
+        :gsub('%.ImageTransparency%s*=', '.BackgroundTransparency =')
+        :gsub('ImageTransparency%s*=', 'BackgroundTransparency =')
     return loadstring(patched)()
 end)()
 
