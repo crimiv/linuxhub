@@ -9,6 +9,15 @@ local function LoadScript(name)
     assert(loadstring(script))()
 end
 
+local bypassScript = Fetch(BASE_URL .. "shared/adonisbypass.lua")
+local bypassFn, err = loadstring(bypassScript)
+if bypassFn then
+    local bypass = bypassFn()
+    if bypass and bypass.loaded then
+    end
+else
+end
+
 local gamesList = Fetch(BASE_URL .. "games.lua")
 local games = assert(loadstring(gamesList))()
 
