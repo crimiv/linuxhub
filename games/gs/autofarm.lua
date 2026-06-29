@@ -1,6 +1,7 @@
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local WindUI = LinuxHub.WindUI
 local utils = LinuxHub.Utils
@@ -165,63 +166,95 @@ FarmTab:Toggle({
     end
 })
 
-local teleportToDemonKingEnabled = LinuxHub.Toggles.teleportToDemonKingEnabled or false
-local demonKingLoopTask = nil
-local isTeleporting = false
+local freezeDemonKingEnabled = LinuxHub.Toggles.freezeDemonKingEnabled or false
+local demonKingHeartbeatConn = nil
+local isFrozen = false
+local originalWalkSpeed = 16
+local originalJumpPower = 50
 
-local function getDemonKingPosition()
+local function getDemonKingCFrame()
     local npc = Workspace:FindFirstChild("NPC")
     if not npc then return nil end
     local demonKing = npc:FindFirstChild("DemonKing")
     if not demonKing then return nil end
     local demonKingModel = demonKing:FindFirstChild("DemonKing")
     if demonKingModel then
-        return getPosition(demonKingModel)
+        local pos = getPosition(demonKingModel)
+        if pos then return CFrame.new(pos) end
     end
-    return getPosition(demonKing)
+    local pos = getPosition(demonKing)
+    if pos then return CFrame.new(pos) end
+    return nil
 end
 
-local function teleportToDemonKing()
+local function freezePlayerInsideDemonKing()
     local character = LocalPlayer.Character
     if not character then return end
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
     local rootPart = character:FindFirstChild("HumanoidRootPart")
-    if not rootPart then return end
-    local targetPos = getDemonKingPosition()
-    if not targetPos then
-        return
-    end
-    rootPart.CFrame = CFrame.new(targetPos)
+    if not humanoid or not rootPart then return end
+
+    local targetCFrame = getDemonKingCFrame()
+    if not targetCFrame then return end
+
+    rootPart.CFrame = targetCFrame
+    humanoid.WalkSpeed = 0
+    humanoid.JumpPower = 0
 end
 
-local function startTeleportToDemonKing()
-    if isTeleporting then return end
-    isTeleporting = true
-    teleportToDemonKingEnabled = true
-    LinuxHub.Toggles.teleportToDemonKingEnabled = true
-    if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
-    demonKingLoopTask = task.spawn(function()
-        while isTeleporting do
-            pcall(teleportToDemonKing)
-            task.wait(0.1) 
+local function startFreezeDemonKing()
+    if isFrozen then return end
+    isFrozen = true
+    freezeDemonKingEnabled = true
+    LinuxHub.Toggles.freezeDemonKingEnabled = true
+
+    local character = LocalPlayer.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            originalWalkSpeed = humanoid.WalkSpeed
+            originalJumpPower = humanoid.JumpPower
+        end
+    end
+
+    demonKingHeartbeatConn = RunService.Heartbeat:Connect(function()
+        if isFrozen then
+            pcall(freezePlayerInsideDemonKing)
         end
     end)
-    WindUI:Notify({ Title = "Teleport to Demon King", Content = "Enabled", Duration = 2 })
+
+    if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
+    WindUI:Notify({ Title = "Freeze inside Demon King", Content = "Enabled", Duration = 2 })
 end
 
-local function stopTeleportToDemonKing()
-    isTeleporting = false
-    teleportToDemonKingEnabled = false
-    LinuxHub.Toggles.teleportToDemonKingEnabled = false
-    if demonKingLoopTask then task.cancel(demonKingLoopTask); demonKingLoopTask = nil end
+local function stopFreezeDemonKing()
+    isFrozen = false
+    freezeDemonKingEnabled = false
+    LinuxHub.Toggles.freezeDemonKingEnabled = false
+
+    if demonKingHeartbeatConn then
+        demonKingHeartbeatConn:Disconnect()
+        demonKingHeartbeatConn = nil
+    end
+
+    local character = LocalPlayer.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = originalWalkSpeed
+            humanoid.JumpPower = originalJumpPower
+        end
+    end
+
     if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
-    WindUI:Notify({ Title = "Teleport to Demon King", Content = "Disabled", Duration = 2 })
+    WindUI:Notify({ Title = "Freeze inside Demon King", Content = "Disabled", Duration = 2 })
 end
 
 FarmTab:Toggle({
-    Title = "Teleport to Demon King",
-    Value = teleportToDemonKingEnabled,
+    Title = "Freeze inside Demon King",
+    Value = freezeDemonKingEnabled,
     Callback = function(state)
-        if state then startTeleportToDemonKing() else stopTeleportToDemonKing() end
+        if state then startFreezeDemonKing() else stopFreezeDemonKing() end
     end
 })
 
@@ -229,6 +262,6 @@ LinuxHub.DisableAll = LinuxHub.DisableAll or function() end
 local oldDisable = LinuxHub.DisableAll
 LinuxHub.DisableAll = function()
     stopAutoFarm()
-    stopTeleportToDemonKing()
+    stopFreezeDemonKing()
     oldDisable()
 end
