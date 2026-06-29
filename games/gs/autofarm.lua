@@ -210,7 +210,7 @@ local function createOrbitToggle(targetName, targetPath, defaultRadius, defaultS
         end)
 
         if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
-        pcall(WindUI.Notify, WindUI, { Title = "Auto Farm " .. targetName, Content = "Enabled", Duration = 2 })
+        pcall(WindUI.Notify, WindUI, { Title = "Orbit around " .. targetName, Content = "Enabled", Duration = 2 })
     end
 
     local function stopOrbit()
@@ -242,12 +242,12 @@ local function createOrbitToggle(targetName, targetPath, defaultRadius, defaultS
         end
 
         if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
-        pcall(WindUI.Notify, WindUI, { Title = "Auto Farm " .. targetName, Content = "Disabled", Duration = 2 })
+        pcall(WindUI.Notify, WindUI, { Title = "Orbit around " .. targetName, Content = "Disabled", Duration = 2 })
     end
 
     pcall(function()
         FarmTab:Toggle({
-            Title = "Auto Farm " .. targetName,
+            Title = "Orbit around " .. targetName,
             Value = orbitEnabled,
             Callback = function(state)
                 if state then startOrbit() else stopOrbit() end
