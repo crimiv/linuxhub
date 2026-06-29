@@ -67,6 +67,32 @@ MiscTab:Toggle({
     end
 })
 
+local function LoadDex(url)
+    local success, result = pcall(function()
+        return loadstring(game:HttpGet(url))()
+    end)
+    if not success then
+        WindUI:Notify({
+            Title = "Error",
+            Content = "Failed to load Dex. Check your connection.",
+            Duration = 4,
+        })
+    else
+        WindUI:Notify({
+            Title = "Dex Loaded",
+            Content = "Dex Explorer loaded successfully.",
+            Duration = 3,
+        })
+    end
+end
+
+MiscTab:Button({
+    Title = "Load Dex Explorer",
+    Callback = function()
+        LoadDex("https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/refs/heads/main/DexByMoonMobile")
+    end
+})
+
 LinuxHub.DisableAll = function()
     antiFlingEnabled = false
     LinuxHub.Toggles.antiFlingEnabled = false
