@@ -460,23 +460,40 @@ local function TeleportToGunDrop(gunDrop)
     rootPart.CFrame = targetCFrame
     local collected = false
     local con1, con2
+
     local function checkGun()
         if localPlayer.Backpack and localPlayer.Backpack:FindFirstChild("Gun") then
             collected = true
         elseif character and character:FindFirstChild("Gun") then
             collected = true
         end
+
         if collected then
             if con1 then con1:Disconnect() end
             if con2 then con2:Disconnect() end
         end
     end
-    con1 = localPlayer.Backpack.ChildAdded:Connect(checkGun)
-    con2 = character.ChildAdded:Connect(checkGun)
+
+    -- Return immediately when gun is picked up.
+    con1 = localPlayer.Backpack.ChildAdded:Connect(function()
+        checkGun()
+    end)
+    con2 = character.ChildAdded:Connect(function()
+        checkGun()
+    end)
+
     checkGun()
-    task.wait(1)
-    con1:Disconnect()
-    con2:Disconnect()
+
+    -- Safety timeout to prevent getting stuck on failed detection.
+    local timeoutSeconds = 0.35
+    local start = tick()
+    while not collected and (tick() - start) < timeoutSeconds do
+        task.wait()
+    end
+
+    if con1 then con1:Disconnect() end
+    if con2 then con2:Disconnect() end
+
     rootPart.CFrame = originalCFrame
     isTeleporting = false
 end
