@@ -219,7 +219,7 @@ local function UpdatePlayerHighlights()
                 highlight.FillTransparency = 0.5
                 highlight.OutlineColor = roleColor
                 highlight.OutlineTransparency = 0.2
-                highlight.Visible = true
+                highlight.Enabled = true
             elseif highlight then
                 highlight:Destroy()
                 playerHighlightInstances[player] = nil
@@ -250,7 +250,7 @@ local function UpdateGunDropHighlights()
                 gunDropHighlightInstances[obj] = highlight
             end
             highlight.Adornee = obj
-            highlight.Visible = true
+            highlight.Enabled = true
         end
     end
 
