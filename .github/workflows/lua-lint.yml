@@ -20,3 +20,13 @@ jobs:
         run: |
           luacheck --version || true
           luacheck . || true
+      - name: Run luac syntax check
+        run: |
+          if command -v luac >/dev/null 2>&1; then
+            echo "Running luac -p on .lua files"
+            find . -name "*.lua" -print0 | xargs -0 -n1 luac -p || true
+          else
+            echo "luac not found; installing lua5.3"
+            sudo apt-get update && sudo apt-get install -y lua5.3
+            find . -name "*.lua" -print0 | xargs -0 -n1 luac -p || true
+          fi
