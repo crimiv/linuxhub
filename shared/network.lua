@@ -58,7 +58,7 @@ function Network.Fetch(url, opts)
     end
 
     local normalized = result:gsub("^%s+", "")
-    if normalized:find("^<") or normalized:find("404: Not Found") or normalized:find("403: Forbidden") or normalized:find("Bad Request") then
+    if normalized:find("^<") or normalized:find("404: Not Found") or normalized:find("403: Forbidden") or normalized:find("Bad Request") or normalized:find("429") or normalized:find("Too Many Requests") or normalized:find("rate limit") then
         local fallback = readVendor(opts.resourcePath or "")
         if fallback then
             Network._cache[url] = fallback
