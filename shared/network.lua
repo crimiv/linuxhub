@@ -18,19 +18,31 @@ end
 
 -- Try to read a local vendor file as a fallback when network fetch fails.
 local function readVendor(resourcePath)
-    local vendorPath = "vendor/" .. resourcePath
-    if type(readfile) == "function" and type(isfile) == "function" then
-        local ok, content = pcall(readfile, vendorPath)
-        if ok and type(content) == "string" then
+    local candidates = {
+        "vendor/" .. resourcePath,
+        "./vendor/" .. resourcePath,
+    }
+    if not resourcePath:match("^vendor/") then
+        table.insert(candidates, resourcePath)
+        table.insert(candidates, "./" .. resourcePath)
+    end
+
+    for _, vendorPath in ipairs(candidates) do
+        if type(readfile) == "function" and type(isfile) == "function" then
+            local ok, content = pcall(readfile, vendorPath)
+            if ok and type(content) == "string" then
+                return content
+            end
+        end
+
+        local ok, f = pcall(function() return io.open(vendorPath, "r") end)
+        if ok and f then
+            local content = f:read("*a")
+            f:close()
             return content
         end
     end
-
-    local ok, f = pcall(function() return io.open(vendorPath, "r") end)
-    if not ok or not f then return nil end
-    local content = f:read("*a")
-    f:close()
-    return content
+    return nil
 end
 
 function Network.Fetch(url, opts)

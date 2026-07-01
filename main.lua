@@ -1,23 +1,40 @@
 local BASE_URL = "https://raw.githubusercontent.com/crimiv/linuxhub/main/"
 
 local function readLocalFile(path)
-    if type(readfile) == "function" and type(isfile) == "function" then
-        local ok, content = pcall(readfile, path)
-        if ok and type(content) == "string" then
+    local candidates = {
+        path,
+        "./" .. path,
+        "../" .. path,
+    }
+
+    if not path:match("^vendor/") then
+        table.insert(candidates, "vendor/" .. path)
+        table.insert(candidates, "./vendor/" .. path)
+    end
+
+    if not path:match("^shared/") then
+        table.insert(candidates, "shared/" .. path)
+        table.insert(candidates, "./shared/" .. path)
+    end
+
+    for _, candidate in ipairs(candidates) do
+        if type(readfile) == "function" and type(isfile) == "function" then
+            local ok, content = pcall(readfile, candidate)
+            if ok and type(content) == "string" then
+                return content
+            end
+        end
+
+        local ok, file = pcall(function()
+            return io.open(candidate, "r")
+        end)
+        if ok and file then
+            local content = file:read("*a")
+            file:close()
             return content
         end
     end
-
-    local ok, file = pcall(function()
-        return io.open(path, "r")
-    end)
-    if not ok or not file then
-        return nil
-    end
-
-    local content = file:read("*a")
-    file:close()
-    return content
+    return nil
 end
 
 local function Fetch(url, opts)
@@ -25,9 +42,6 @@ local function Fetch(url, opts)
     local function fallbackLocal()
         if opts.resourcePath then
             return readLocalFile(opts.resourcePath)
-                or readLocalFile("vendor/" .. opts.resourcePath)
-                or readLocalFile("shared/" .. opts.resourcePath)
-                or readLocalFile("vendor/shared/" .. opts.resourcePath)
         end
         return nil
     end
