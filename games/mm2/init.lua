@@ -1,10 +1,9 @@
 local BASE_URL = "https://raw.githubusercontent.com/crimiv/linuxhub/main/"
 
+local Network = LoadScript("shared/network.lua")
+
 local function LoadScript(name)
-    local script = game:HttpGet(BASE_URL .. name)
-    local fn, err = loadstring(script)
-    if not fn then error(err) end
-    return fn()
+    return Network.LoadRelative(BASE_URL, name)
 end
 
 local function CheckExecutor()
@@ -102,8 +101,7 @@ LoadScript("games/mm2/troll.lua")
 LoadScript("games/mm2/misc.lua")
 LoadScript("games/mm2/teleport.lua")
 LoadScript("games/mm2/settings.lua")
-LoadScript("games/universal/admin.lua")
-LoadScript("games/universal/misc.lua")
+LoadScript("games/universal/universal.lua")
 
 if _G.LINUXHUB_STATES then
     for key, value in pairs(_G.LINUXHUB_STATES) do
