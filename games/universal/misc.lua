@@ -1,61 +1,6 @@
 local WindUI = LinuxHub.WindUI
 
--- Create one unified "Universal" tab and group admin/misc controls under it
-local UniversalTab = LinuxHub.Window:CreateTab({
-    Title = "Universal",
-    Icon = "rbxassetid://11942428",
-})
-
-local function notify(title, content, duration)
-    WindUI:Notify({
-        Title = title,
-        Content = content,
-        Duration = duration or 3,
-    })
-end
-
--- Admin controls
-UniversalTab:Paragraph({
-    Title = "Admin Tools",
-    Content = "Load popular admin scripts. Use responsibly."
-})
-
-local function LoadAdmin(url)
-    local success, result = pcall(function()
-        if LinuxHub and LinuxHub.Network and LinuxHub.Network.Load then
-            return LinuxHub.Network.Load(url)
-        else
-            return loadstring(game:HttpGet(url))()
-        end
-    end)
-    if not success then
-        notify("Admin: Load Failed", "Failed to load admin script. Check your connection.")
-    else
-        notify("Admin: Loaded", "Admin script executed successfully.")
-    end
-end
-
-UniversalTab:Button({
-    Title = "Load Nameless Admin",
-    Callback = function()
-        LoadAdmin("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/Source.lua")
-    end
-})
-
-UniversalTab:Button({
-    Title = "Load Infinite Yield",
-    Callback = function()
-        LoadAdmin("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source")
-    end
-})
-
--- Misc controls
-UniversalTab:Paragraph({
-    Title = "Misc Tools",
-    Content = "Utility scripts and small helpers."
-})
-
-local MiscTab = UniversalTab
+local MiscTab = LinuxHub.Window:Tab({ Title = "Misc" })
 
 local antiFlingEnabled = LinuxHub.Toggles.antiFlingEnabled or false
 local antiFlingHeartbeat = nil
@@ -124,16 +69,20 @@ MiscTab:Toggle({
 
 local function LoadDex(url)
     local success, result = pcall(function()
-        if LinuxHub and LinuxHub.Network and LinuxHub.Network.Load then
-            return LinuxHub.Network.Load(url)
-        else
-            return loadstring(game:HttpGet(url))()
-        end
+        return loadstring(game:HttpGet(url))()
     end)
     if not success then
-        notify("Dex: Load Failed", "Failed to load Dex. Check your connection.")
+        WindUI:Notify({
+            Title = "Error",
+            Content = "Failed to load Dex. Check your connection.",
+            Duration = 4,
+        })
     else
-        notify("Dex: Loaded", "Dex loaded successfully.")
+        WindUI:Notify({
+            Title = "Dex Loaded",
+            Content = "Dex loaded successfully.",
+            Duration = 3,
+        })
     end
 end
 
@@ -146,16 +95,20 @@ MiscTab:Button({
 
 local function LoadSimpleSpy(url)
     local success, result = pcall(function()
-        if LinuxHub and LinuxHub.Network and LinuxHub.Network.Load then
-            return LinuxHub.Network.Load(url)
-        else
-            return loadstring(game:HttpGetAsync(url))()
-        end
+        return loadstring(game:HttpGetAsync(url))()
     end)
     if not success then
-        notify("Simple Spy: Load Failed", "Failed to load Simple Spy. Check your connection.")
+        WindUI:Notify({
+            Title = "Error",
+            Content = "Failed to load Simple Spy. Check your connection.",
+            Duration = 4,
+        })
     else
-        notify("Simple Spy: Loaded", "Simple Spy loaded successfully.")
+        WindUI:Notify({
+            Title = "Simple Spy Loaded",
+            Content = "Simple Spy loaded successfully.",
+            Duration = 3,
+        })
     end
 end
 
@@ -168,16 +121,20 @@ MiscTab:Button({
 
 local function LoadCobalt(url)
     local success, result = pcall(function()
-        if LinuxHub and LinuxHub.Network and LinuxHub.Network.Load then
-            return LinuxHub.Network.Load(url)
-        else
-            return loadstring(game:HttpGetAsync(url))()
-        end
+        return loadstring(game:HttpGetAsync(url))()
     end)
     if not success then
-        notify("Cobalt: Load Failed", "Failed to load Cobalt. Check your connection.")
+        WindUI:Notify({
+            Title = "Error",
+            Content = "Failed to load Cobalt. Check your connection.",
+            Duration = 4,
+        })
     else
-        notify("Cobalt: Loaded", "Cobalt loaded successfully.")
+        WindUI:Notify({
+            Title = "Cobalt Loaded",
+            Content = "Cobalt loaded successfully.",
+            Duration = 3,
+        })
     end
 end
 

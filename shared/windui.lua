@@ -1,33 +1,8 @@
-local function FetchWindUIScript()
-    local urls = {
-        "https://github.com/Footagesus/WindUI/releases/latest/download/main.lua",
-        "https://raw.githubusercontent.com/Footagesus/WindUI/main/main.lua",
-    }
-    local lastError
-    for _, url in ipairs(urls) do
-        local success, raw = pcall(function()
-            return game:HttpGet(url)
-        end)
-        if success and type(raw) == "string" then
-            if not raw:find("^%s*<") and not raw:find("404: Not Found") then
-                return raw
-            end
-            lastError = "Invalid response from " .. url
-        else
-            lastError = tostring(raw)
-        end
-    end
-    error("Failed to fetch WindUI library: " .. tostring(lastError))
-end
-
 local WindUI = (function()
-    local raw = FetchWindUIScript()
+    local url = "https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"
+    local raw = game:HttpGet(url)
     local patched = raw:gsub('IconLabelFrame = New%( "ImageLabel", %{', 'IconLabelFrame = New( "Frame", {')
-    local fn, err = loadstring(patched)
-    if not fn then
-        error("WindUI loadstring failed: " .. tostring(err))
-    end
-    return fn()
+    return loadstring(patched)()
 end)()
 
 local function DefineTheme(name, colors)

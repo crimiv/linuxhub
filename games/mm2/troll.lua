@@ -227,6 +227,80 @@ TrollTab:Button({
     end
 })
 
+TrollTab:Button({
+    Title = "Fling Selected Player",
+    Callback = function()
+        if _G.LINUXHUB_UPDATING then return end
+        if not selectedFlingPlayer or selectedFlingPlayer == "No other players" then
+            WindUI:Notify({ Title = "Error", Content = "No valid player selected", Duration = 2 })
+            return
+        end
+        local targetPlayer = game.Players:FindFirstChild(selectedFlingPlayer)
+        if not targetPlayer then
+            WindUI:Notify({ Title = "Error", Content = "Selected player not found", Duration = 2 })
+            return
+        end
+        task.spawn(function()
+            while targetPlayer and targetPlayer.Parent do
+                if _G.LINUXHUB_UPDATING then break end
+                local launched = FlingPlayer(targetPlayer, true)
+                if launched then
+                    break
+                end
+                task.wait(0.5)
+            end
+        end)
+    end
+})
+
+local loopFlingSelectedEnabled = LinuxHub.Toggles.loopFlingSelectedEnabled or false
+local loopFlingSelectedCoroutine = nil
+
+TrollTab:Toggle({
+    Title = "Loop Fling Selected Player",
+    Value = loopFlingSelectedEnabled,
+    Callback = function(state)
+        loopFlingSelectedEnabled = state
+        LinuxHub.Toggles.loopFlingSelectedEnabled = state
+        if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
+        WindUI:Notify({
+            Title = "Loop Fling Selected Player",
+            Content = loopFlingSelectedEnabled and "Enabled" or "Disabled",
+            Duration = 2,
+        })
+        if loopFlingSelectedEnabled then
+            if loopFlingSelectedCoroutine then
+                loopFlingSelectedCoroutine = nil
+            end
+            loopFlingSelectedCoroutine = coroutine.create(function()
+                while loopFlingSelectedEnabled do
+                    if _G.LINUXHUB_UPDATING then break end
+                    if selectedFlingPlayer and selectedFlingPlayer ~= "No other players" then
+                        local targetPlayer = game.Players:FindFirstChild(selectedFlingPlayer)
+                        if targetPlayer then
+                            local launched = FlingPlayer(targetPlayer, true)
+                            if launched then
+                                task.wait(0.5)
+                            else
+                                task.wait(0.1)
+                            end
+                        else
+                            task.wait(0.5)
+                        end
+                    else
+                        task.wait(0.5)
+                    end
+                end
+            end)
+            coroutine.resume(loopFlingSelectedCoroutine)
+        else
+            if loopFlingSelectedCoroutine then
+                loopFlingSelectedCoroutine = nil
+            end
+        end
+    end
+})
+
 game.Players.PlayerAdded:Connect(CreateFlingDropdown)
 game.Players.PlayerRemoving:Connect(CreateFlingDropdown)
 

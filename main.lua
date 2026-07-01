@@ -1,114 +1,77 @@
+local function Fetch(url)
+    return game:HttpGet(url)
+end
+
 local BASE_URL = "https://raw.githubusercontent.com/crimiv/linuxhub/main/"
 
-local function readLocalFile(path)
-    local candidates = {
-        path,
-        "./" .. path,
-        "../" .. path,
-    }
-
-    if not path:match("^vendor/") then
-        table.insert(candidates, "vendor/" .. path)
-        table.insert(candidates, "./vendor/" .. path)
-    end
-
-    if not path:match("^shared/") then
-        table.insert(candidates, "shared/" .. path)
-        table.insert(candidates, "./shared/" .. path)
-    end
-
-    for _, candidate in ipairs(candidates) do
-        if type(readfile) == "function" and type(isfile) == "function" then
-            local ok, content = pcall(readfile, candidate)
-            if ok and type(content) == "string" then
-                return content
-            end
-        end
-
-        local ok, file = pcall(function()
-            return io.open(candidate, "r")
-        end)
-        if ok and file then
-            local content = file:read("*a")
-            file:close()
-            return content
-        end
-    end
-    return nil
-end
-
-local function Fetch(url, opts)
-    opts = opts or {}
-    local function fallbackLocal()
-        if opts.resourcePath then
-            return readLocalFile(opts.resourcePath)
-        end
-        return nil
-    end
-
-    local success, response = pcall(function()
-        return game:HttpGet(url)
-    end)
-    if not success or type(response) ~= "string" then
-        local fallback = fallbackLocal()
-        if fallback then
-            return fallback
-        end
-        error("Failed to fetch URL: " .. tostring(url) .. " (" .. tostring(response) .. ")")
-    end
-
-    local normalized = response:gsub("^%s+", "")
-    if normalized:find("^<") or normalized:find("404: Not Found") or normalized:find("403: Forbidden") or normalized:find("Bad Request") or normalized:find("429") or normalized:find("Too Many Requests") or normalized:find("rate limit") then
-        local fallback = fallbackLocal()
-        if fallback then
-            return fallback
-        end
-        error("Invalid fetch response from " .. tostring(url))
-    end
-    return response
-end
-
 local function LoadScript(name)
-    local script = Fetch(BASE_URL .. name, { resourcePath = name })
-    local fn, err = loadstring(script)
-    if not fn then
-        error("Failed to compile " .. tostring(name) .. ": " .. tostring(err))
-    end
-    return fn()
+    local script = Fetch(BASE_URL .. name)
+    assert(loadstring(script))()
 end
 
-local Network = LoadScript("shared/network.lua")
-LinuxHub = LinuxHub or {}
-LinuxHub.Network = Network
-
--- Always run adonisbypass; use Network loader so vendor fallback/cache applies.
-do
-    local ok, err = pcall(function()
-        if LinuxHub and LinuxHub.Network and LinuxHub.Network.LoadRelative then
-            LinuxHub.Network.LoadRelative(BASE_URL, "shared/adonisbypass.lua")
-        else
-            local bypassScript = Fetch(BASE_URL .. "shared/adonisbypass.lua")
-            local bypassFn, bypassErr = loadstring(bypassScript)
-            if not bypassFn then
-                error("Failed to compile bypass script: " .. tostring(bypassErr))
-            end
-            bypassFn()
-        end
-    end)
-    if not ok then
-        warn("Adonis bypass load failed: " .. tostring(err))
-    end
+local bypassScript = Fetch(BASE_URL .. "shared/adonisbypass.lua")
+local bypassFn = loadstring(bypassScript)
+if bypassFn then
+    bypassFn()
 end
 
-local version = "1.0.0"
+local version = Fetch(BASE_URL .. "version.txt")
+if version then
+    version = version:gsub("%s+", "")
+else
+    version = "1.0.0"
+end
+
 LINUXHUB_VERSION = version
 
-local gamesList = Fetch(BASE_URL .. "games.lua", { resourcePath = "games.lua" })
-local gamesFn, gamesErr = loadstring(gamesList)
-if not gamesFn then
-    error("Failed to compile games list: " .. tostring(gamesErr))
+local function PerformUpdate(newVersion)
+    _G.LINUXHUB_UPDATING = true
+    if LinuxHub then
+        LinuxHub.Toggles = LinuxHub.Toggles or {}
+        _G.LINUXHUB_STATES = LinuxHub.Toggles
+        if LinuxHub.Window then
+            LinuxHub.Window:Close()
+        end
+        if LinuxHub.DisableAll then
+            LinuxHub.DisableAll()
+        end
+    end
+    local WindUI = LinuxHub and LinuxHub.WindUI
+    if WindUI then
+        WindUI:Notify({
+            Title = "Updating",
+            Content = "Updating to v" .. newVersion .. "...",
+            Duration = 3,
+        })
+    else
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Updating",
+            Text = "Updating to v" .. newVersion .. "...",
+            Duration = 3,
+        })
+    end
+    task.wait(1)
+    _G.LINUXHUB_UPDATING = false
+    loadstring(game:HttpGet(BASE_URL .. "main.lua"))()
 end
-local games = gamesFn()
+
+task.spawn(function()
+    while true do
+        task.wait(1)
+        if _G.LINUXHUB_UPDATING then break end
+        local success, newVersion = pcall(function()
+            local raw = game:HttpGet(BASE_URL .. "version.txt")
+            return raw:gsub("%s+", "")
+        end)
+        if success and newVersion and newVersion ~= LINUXHUB_VERSION then
+            PerformUpdate(newVersion)
+            break
+        end
+    end
+end)
+
+local gamesList = Fetch(BASE_URL .. "games.lua")
+local games = assert(loadstring(gamesList))()
 
 local placeId = game.PlaceId or game.GameId
 local gameEntry = games[placeId]

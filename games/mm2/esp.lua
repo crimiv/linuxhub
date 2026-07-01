@@ -5,11 +5,10 @@ local config = LinuxHub.Config
 local VisualTab = LinuxHub.Window:Tab({ Title = "Visual" })
 
 local espEnabled = LinuxHub.Toggles.espEnabled or false
+local skeletonEnabled = LinuxHub.Toggles.skeletonEnabled or false
 local highlightInstances = {}
+local skeletonLines = {}
 local espUpdateCooldown = 0
-local gunHighlightEnabled = LinuxHub.Toggles.gunHighlightEnabled or false
-local gunHighlightInstances = {}
-local gunHighlightConnection = nil
 
 local function GetPlayerRoleColor(player)
     if not player then return nil end
@@ -31,77 +30,163 @@ local function ClearESP()
     highlightInstances = {}
 end
 
-local function ClearGunHighlights()
-    for _, highlight in pairs(gunHighlightInstances) do
-        if highlight and highlight.Parent then
-            highlight:Destroy()
+local function ClearSkeleton()
+    for player, lines in pairs(skeletonLines) do
+        for _, line in pairs(lines) do
+            if line then line:Remove() end
         end
     end
-    gunHighlightInstances = {}
+    skeletonLines = {}
 end
 
-local function IsGunDrop(instance)
-    if not instance then return false end
-    return instance.Name == "GunDrop"
-end
-
-local function TryHighlightGunDrop(instance)
-    if not gunHighlightEnabled or not instance or gunHighlightInstances[instance] then return false end
-    if not IsGunDrop(instance) then return false end
-
-    local highlight = Instance.new("Highlight")
-    highlight.Adornee = instance
-    highlight.FillColor = Color3.fromRGB(255, 255, 0)
-    highlight.FillTransparency = 0.4
-    highlight.OutlineColor = Color3.fromRGB(255, 255, 0)
-    highlight.OutlineTransparency = 0.2
-    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-    highlight.Parent = instance
-    gunHighlightInstances[instance] = highlight
-    return true
-end
-
-local function ScanForGunDrops()
-    if not gunHighlightEnabled then return end
-    for _, child in ipairs(workspace:GetDescendants()) do
-        if child and child.Parent then
-            TryHighlightGunDrop(child)
+local function UpdateSkeleton(player)
+    if not skeletonEnabled then
+        local lines = skeletonLines[player]
+        if lines then
+            for _, line in pairs(lines) do
+                line.Visible = false
+            end
         end
-    end
-end
-
-local function SetupGunHighlightTracking()
-    if gunHighlightConnection then
-        gunHighlightConnection:Disconnect()
-        gunHighlightConnection = nil
-    end
-
-    if not gunHighlightEnabled then
-        ClearGunHighlights()
         return
     end
 
-    ScanForGunDrops()
-    gunHighlightConnection = workspace.DescendantAdded:Connect(function(instance)
-        if _G.LINUXHUB_UPDATING then return end
-        if not gunHighlightEnabled then return end
-        if TryHighlightGunDrop(instance) then
-            WindUI:Notify({
-                Title = "Gun Highlight",
-                Content = "Sheriff gun dropped",
-                Duration = 2,
-            })
+    if not player or player == game.Players.LocalPlayer then return end
+    local character = player.Character
+    if not character then
+        local lines = skeletonLines[player]
+        if lines then
+            for _, line in pairs(lines) do
+                line.Visible = false
+            end
         end
-    end)
+        return
+    end
+
+    local function getPart(name)
+        return character:FindFirstChild(name)
+    end
+
+    local head = getPart("Head")
+    local upperTorso = getPart("UpperTorso") or getPart("Torso")
+    local lowerTorso = getPart("LowerTorso") or getPart("Torso")
+    local root = getPart("HumanoidRootPart")
+
+    local leftUpperArm = getPart("LeftUpperArm") or getPart("Left Arm")
+    local leftLowerArm = getPart("LeftLowerArm") or getPart("Left Arm")
+    local leftHand = getPart("LeftHand") or getPart("Left Arm")
+    local rightUpperArm = getPart("RightUpperArm") or getPart("Right Arm")
+    local rightLowerArm = getPart("RightLowerArm") or getPart("Right Arm")
+    local rightHand = getPart("RightHand") or getPart("Right Arm")
+
+    local leftUpperLeg = getPart("LeftUpperLeg") or getPart("Left Leg")
+    local leftLowerLeg = getPart("LeftLowerLeg") or getPart("Left Leg")
+    local leftFoot = getPart("LeftFoot") or getPart("Left Leg")
+    local rightUpperLeg = getPart("RightUpperLeg") or getPart("Right Leg")
+    local rightLowerLeg = getPart("RightLowerLeg") or getPart("Right Leg")
+    local rightFoot = getPart("RightFoot") or getPart("Right Leg")
+
+    if not (head and upperTorso and lowerTorso) then
+        local lines = skeletonLines[player]
+        if lines then
+            for _, line in pairs(lines) do
+                line.Visible = false
+            end
+        end
+        return
+    end
+
+    if not skeletonLines[player] then
+        skeletonLines[player] = {}
+    end
+    local lines = skeletonLines[player]
+
+    local function getLine(name)
+        if not lines[name] then
+            lines[name] = Drawing.new("Line")
+            lines[name].Thickness = 1.5
+            lines[name].Transparency = 1
+        end
+        return lines[name]
+    end
+
+    local function drawBone(fromPart, toPart, lineName)
+        local line = getLine(lineName)
+        if not fromPart or not toPart then
+            line.Visible = false
+            return
+        end
+
+        local fromPos = fromPart.Position
+        local toPos = toPart.Position
+
+        local fromScreen, fromVisible = workspace.CurrentCamera:WorldToViewportPoint(fromPos)
+        local toScreen, toVisible = workspace.CurrentCamera:WorldToViewportPoint(toPos)
+
+        if fromVisible and toVisible and fromScreen.Z > 0 and toScreen.Z > 0 then
+            local color = GetPlayerRoleColor(player) or Color3.new(1, 1, 1)
+            line.From = Vector2.new(fromScreen.X, fromScreen.Y)
+            line.To = Vector2.new(toScreen.X, toScreen.Y)
+            line.Color = color
+            line.Visible = true
+        else
+            line.Visible = false
+        end
+    end
+
+    local bones = {
+        {"Head_UpperTorso", head, upperTorso},
+        {"UpperTorso_LowerTorso", upperTorso, lowerTorso},
+
+        {"LeftShoulder", upperTorso, leftUpperArm},
+        {"LeftUpperArm", leftUpperArm, leftLowerArm},
+        {"LeftLowerArm", leftLowerArm, leftHand},
+
+        {"RightShoulder", upperTorso, rightUpperArm},
+        {"RightUpperArm", rightUpperArm, rightLowerArm},
+        {"RightLowerArm", rightLowerArm, rightHand},
+
+        {"LeftHip", lowerTorso, leftUpperLeg},
+        {"LeftUpperLeg", leftUpperLeg, leftLowerLeg},
+        {"LeftLowerLeg", leftLowerLeg, leftFoot},
+
+        {"RightHip", lowerTorso, rightUpperLeg},
+        {"RightUpperLeg", rightUpperLeg, rightLowerLeg},
+        {"RightLowerLeg", rightLowerLeg, rightFoot},
+    }
+
+    for _, bone in ipairs(bones) do
+        drawBone(bone[2], bone[3], bone[1])
+    end
+
+    for name, line in pairs(lines) do
+        local found = false
+        for _, bone in ipairs(bones) do
+            if bone[1] == name then
+                found = true
+                break
+            end
+        end
+        if not found then
+            line.Visible = false
+        end
+    end
 end
 
 local function UpdateESP()
     if _G.LINUXHUB_UPDATING then
         ClearESP()
+        ClearSkeleton()
         return
     end
     ClearESP()
-    if not espEnabled then return end
+    if not espEnabled then
+        if skeletonEnabled then
+            for _, player in pairs(game.Players:GetPlayers()) do
+                UpdateSkeleton(player)
+            end
+        end
+        return
+    end
     local localPlayer = game.Players.LocalPlayer
     if not localPlayer then return end
     for _, player in pairs(game.Players:GetPlayers()) do
@@ -118,6 +203,10 @@ local function UpdateESP()
         highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
         highlight.Parent = player.Character
         highlightInstances[player] = highlight
+
+        if skeletonEnabled then
+            UpdateSkeleton(player)
+        end
     end
 end
 
@@ -165,6 +254,13 @@ if roundTimer then
 end
 
 if espEnabled then UpdateESP() end
+if skeletonEnabled then
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player ~= game.Players.LocalPlayer then
+            UpdateSkeleton(player)
+        end
+    end
+end
 
 game.Players.PlayerAdded:Connect(function(player)
     if _G.LINUXHUB_UPDATING then return end
@@ -172,6 +268,7 @@ game.Players.PlayerAdded:Connect(function(player)
         if _G.LINUXHUB_UPDATING then return end
         task.wait(0.5)
         UpdateESP()
+        if skeletonEnabled then UpdateSkeleton(player) end
     end)
 end)
 
@@ -181,15 +278,30 @@ game.Players.PlayerRemoving:Connect(function(player)
         highlightInstances[player]:Destroy()
         highlightInstances[player] = nil
     end
+    if skeletonLines[player] then
+        for _, line in pairs(skeletonLines[player]) do
+            line:Remove()
+        end
+        skeletonLines[player] = nil
+    end
 end)
 
 game:GetService("RunService").Heartbeat:Connect(function()
     if _G.LINUXHUB_UPDATING then return end
-    if espEnabled then
-        local now = tick()
+    local now = tick()
+    if espEnabled or skeletonEnabled then
         if now - espUpdateCooldown >= 0.3 then
             espUpdateCooldown = now
-            UpdateESP()
+            if espEnabled then
+                UpdateESP()
+            end
+            if skeletonEnabled then
+                for _, player in pairs(game.Players:GetPlayers()) do
+                    if player ~= game.Players.LocalPlayer then
+                        UpdateSkeleton(player)
+                    end
+                end
+            end
         end
     end
 end)
@@ -215,36 +327,38 @@ VisualTab:Toggle({
 })
 
 VisualTab:Toggle({
-    Title = "Gun Highlight",
-    Value = gunHighlightEnabled,
+    Title = "Skeleton ESP",
+    Value = skeletonEnabled,
     Callback = function(state)
-        gunHighlightEnabled = state
-        LinuxHub.Toggles.gunHighlightEnabled = state
+        skeletonEnabled = state
+        LinuxHub.Toggles.skeletonEnabled = state
         if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
         WindUI:Notify({
-            Title = "Gun Highlight",
-            Content = gunHighlightEnabled and "Enabled" or "Disabled",
+            Title = "Skeleton ESP",
+            Content = skeletonEnabled and "Skeleton Enabled" or "Skeleton Disabled",
             Duration = 2,
         })
-        SetupGunHighlightTracking()
+        if not skeletonEnabled then
+            ClearSkeleton()
+        else
+            for _, player in pairs(game.Players:GetPlayers()) do
+                if player ~= game.Players.LocalPlayer then
+                    UpdateSkeleton(player)
+                end
+            end
+        end
     end
 })
-
-SetupGunHighlightTracking()
 
 LinuxHub.GetCurrentMurderer = GetCurrentMurderer
 LinuxHub.GetCurrentSheriff = GetCurrentSheriff
 
 LinuxHub.DisableAll = function()
     espEnabled = false
-    gunHighlightEnabled = false
+    skeletonEnabled = false
     LinuxHub.Toggles.espEnabled = false
-    LinuxHub.Toggles.gunHighlightEnabled = false
+    LinuxHub.Toggles.skeletonEnabled = false
     if LinuxHub.SaveSettings then LinuxHub.SaveSettings() end
     ClearESP()
-    ClearGunHighlights()
-    if gunHighlightConnection then
-        gunHighlightConnection:Disconnect()
-        gunHighlightConnection = nil
-    end
+    ClearSkeleton()
 end

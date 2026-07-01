@@ -12,5 +12,4 @@ return {
     themes = {
         "Linux",
     },
-    -- adonisbypass is now always loaded by the hub's startup sequence.
 }
