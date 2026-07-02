@@ -1,6 +1,6 @@
 # Bandit Hub
 
-Just a basic script hub for Roblox
+Just a basic script hub for Roblox with a bunch of supported games.
 
 ## Supported Games
 
