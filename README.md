@@ -11,5 +11,5 @@ Just a basic script hub for Roblox with a bunch of supported games.
 ### Loadstring
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/crimiv/bandithub/refs/heads/blackboxai/test-ui-loader/main.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/crimiv/bandithub/test/main.lua"))()
 ```
