@@ -345,8 +345,8 @@ local function GetAllGunDrops()
 end
 
 local function IsMurdererCampingGunDrop(gd)
-    
-    
+    -- Heuristic: murderer is considered "camping" if they are very close to the GunDrop.
+    -- This prevents us from TP-ing into a gun while the murderer is already positioned there.
     local murderer = BanditHub.GetCurrentMurderer()
     if not murderer or not murderer.Character then return false end
     local mRoot = murderer.Character:FindFirstChild("HumanoidRootPart")
@@ -404,7 +404,7 @@ local function GetClosestGunDrop()
             end
         end
         if gdPos then
-            
+            -- If murderer is camping this gun, skip it.
             if not IsMurdererCampingGunDrop(gd) then
                 local dist = (pos - gdPos).Magnitude
                 if dist < closestDist then
@@ -474,7 +474,7 @@ local function TeleportToGunDrop(gunDrop)
         end
     end
 
-    
+    -- Return immediately when gun is picked up.
     con1 = localPlayer.Backpack.ChildAdded:Connect(function()
         checkGun()
     end)
@@ -484,7 +484,7 @@ local function TeleportToGunDrop(gunDrop)
 
     checkGun()
 
-    
+    -- Safety timeout to prevent getting stuck on failed detection.
     local timeoutSeconds = 0.35
     local start = tick()
     while not collected and (tick() - start) < timeoutSeconds do
@@ -529,8 +529,8 @@ CombatTab:Button({
     end
 })
 
-
-
+-- NOTE: prevent unintended teleporting due to saved settings being true on load.
+-- Only run auto-tp logic after the user explicitly toggles it ON in THIS session.
 local autoGunTPEnabled = BanditHub.Toggles.autoGunTPEnabled or false
 local userEnabledThisSession = false
 local gunTPTimer = nil
@@ -561,7 +561,7 @@ end
 
 local function TryTeleportToGun()
     if _G.BANDITHUB_UPDATING then return end
-    
+    -- Hard guard: if the user never turned it on in this session, do nothing.
     if not userEnabledThisSession then return end
     if not autoGunTPEnabled or isTeleporting then return end
 
@@ -579,7 +579,7 @@ end
 local function SetupAutoGunTP()
     CleanupAutoGunTP()
     if not autoGunTPEnabled then return end
-    
+    -- At this point, the UI callback will have set userEnabledThisSession=true.
     TryTeleportToGun()
 
     gunTPLastCheck = 0

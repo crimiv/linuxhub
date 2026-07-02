@@ -51,7 +51,7 @@ local function HardDisableAll()
 end
 
 local function PerformUpdate(newVersion)
-    
+    -- Prevent “double hub” hot-reload: rebuild in-place instead of re-executing main.lua.
     BANDITHUB_GEN += 1
     _G.BANDITHUB_UPDATING = true
 
@@ -100,14 +100,14 @@ end
 
 
 task.spawn(function()
-    
+    -- Guard so only one updater loop runs.
     if _G.BANDITHUB_UPDATER_THREAD then return end
     _G.BANDITHUB_UPDATER_THREAD = true
 
     while true do
         task.wait(1)
         if _G.BANDITHUB_UPDATING then
-            
+            -- Wait for PerformUpdate to finish.
             continue
         end
 

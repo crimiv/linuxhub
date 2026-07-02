@@ -76,7 +76,7 @@ if BanditHub.Window then
     BanditHub.Window = nil
 end
 
-
+-- Small delay to reduce Window/UI object conflicts during hot reloads.
 task.wait()
 
 local Window = WindUI:CreateWindow({

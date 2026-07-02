@@ -210,8 +210,8 @@ MiscTab:Button({
         local TeleportService = game:GetService("TeleportService")
         local currentJobId = game.JobId
         local minPlayers = 5
-        
-        
+        -- Keep trying until we find a server that's not too small.
+        -- (This is client-side retries; the actual availability is server-dependent.)
         local maxAttempts = 30
         local attempts = 0
         local candidates = nil
@@ -245,13 +245,13 @@ MiscTab:Button({
             return
         end
 
-        
-        
+        -- If we didn't fetch any suitable servers, keep refetching until we either
+        -- find one that meets the minPlayers threshold or we hit maxAttempts.
         while attempts < maxAttempts do
             if not candidates or #candidates == 0 then
                 candidates = fetchServers()
                 if candidates and #candidates > 0 then
-                    
+                    -- continue with teleport attempts
                 else
                     attempts = attempts + 1
                     task.wait(1)

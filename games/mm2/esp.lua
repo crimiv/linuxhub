@@ -8,9 +8,9 @@ local espEnabled = BanditHub.Toggles.espEnabled or false
 local highlightInstances = {}
 local espUpdateCooldown = 0
 
-
+-- GunDrop highlight (Visual)
 local gunHighlightEnabled = BanditHub.Toggles.gunHighlightEnabled or false
-local gunHighlightInstances = {} 
+local gunHighlightInstances = {} -- [gunDropInstance] = Highlight
 local gunHighlightUpdateCooldown = 0
 local gunHighlightTimer = nil
 
@@ -142,7 +142,7 @@ local function UpdateGunDropsHighlight(force)
         seen[gd] = true
     end
 
-    
+    -- Cleanup highlights for gun drops that no longer exist
     for gd, highlight in pairs(gunHighlightInstances) do
         if not seen[gd] then
             if highlight then highlight:Destroy() end
