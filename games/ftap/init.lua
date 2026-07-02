@@ -1,4 +1,4 @@
-local BASE_URL = "https://raw.githubusercontent.com/crimiv/bandithub/main/"
+local BASE_URL = "https://raw.githubusercontent.com/crimiv/bandithub/test/"
 
 local function LoadScript(name)
     local script = game:HttpGet(BASE_URL .. name)
