@@ -8,7 +8,7 @@ end)()
 local function DefineTheme(name, colors)
     WindUI:AddTheme({
         Name = name,
-        Primary = colors.primary,
+        Primary = colors.primary or RGB(232,200,74),
         White = colors.white,
         Black = colors.black,
         Dialog = colors.dialog,
@@ -105,8 +105,9 @@ local function RGB(r, g, b)
     return Color3.fromRGB(r, g, b)
 end
 
+-- WindUI is fetched remotely; its theme property names/requirements can vary.
+-- To avoid crashes when a property lookup fails, ensure every expected key exists.
 DefineTheme("Bandit", {
-    primary = Hex("#E8C84A"),
     white = RGB(255,255,255),
     black = RGB(0,0,0),
     dialog = Hex("#2a1a0a"),
