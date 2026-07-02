@@ -98,15 +98,15 @@ local function DefineTheme(name, colors)
 end
 
 local function Hex(hex)
+    if not hex then return RGB(232,200,74) end
     return Color3.fromHex(hex)
 end
+
 
 local function RGB(r, g, b)
     return Color3.fromRGB(r, g, b)
 end
 
--- WindUI is fetched remotely; its theme property names/requirements can vary.
--- To avoid crashes when a property lookup fails, ensure every expected key exists.
 DefineTheme("Bandit", {
     white = RGB(255,255,255),
     black = RGB(0,0,0),
